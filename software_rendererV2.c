@@ -1372,10 +1372,10 @@ void display(void)
 //    cal_face_normal();
 //    calculate_vertex_normals();                                        // 3D MODEL HAS ALL NORMALS CALUCULATED
 //
-    //rotate_model_xy(xangle, yangle, zangle);                           // IT IS ROTATED
-    //t_model(translation_value - 30);                                        // IT IS TRANSLATED
-    rotate_model_matrix(xangle, yangle, zangle);
-    t_model_matrix(translation_value - 30);                              // matrix versions of^
+    rotate_model_xy(xangle, yangle, zangle);                           // IT IS ROTATED
+    t_model(translation_value - 30);                                        // IT IS TRANSLATED
+//    rotate_model_matrix(xangle, yangle, zangle);
+//    t_model_matrix(translation_value - 30);                              // matrix versions of^
     
     //rotate_translate_matrix( xangle, yangle, zangle, translation_value - 30 );
     
