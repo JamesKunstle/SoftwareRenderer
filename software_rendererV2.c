@@ -363,6 +363,7 @@ int local_lighting =            OFF;
 
 
 POINT g_buffer[WIN_HEIGHT][WIN_WIDTH];
+
 int deferred_rendering = OFF;
 
 /*************************************************************************/
@@ -1361,7 +1362,7 @@ void clear_g_buffer( float r, float g, float b, float a )
     {
         for( int i = 0; i < WIN_WIDTH; i++ )
         {
-            set_vect_4( g_buffer[j][j].RGBA, r, g, b, a );
+            set_vect_4( g_buffer[j][i].RGBA, r, g, b, a );
             g_buffer[j][i].rendered = 0;
         }
     }
@@ -1414,8 +1415,11 @@ void display(void)
     glClear(GL_COLOR_BUFFER_BIT );                                     // CLEAR BUFFERS AND INITIALIZE FILE
     clear_c_buff(0, 0, 0, 1);
     clear_d_buff(1000000);
-    clear_g_buffer( 0.0, 0.0, 0.0, 1.0 );
-    
+    if( deferred_rendering )
+    {
+        clear_g_buffer( 0.0, 0.0, 0.0, 1.0 );
+    }
+  
     init_sphere(1.0, 1.0, 0, 0, -10.0);                                // 3D OBJECT LOADED INTO THE VERTEX/TRIANGLE LIST
     //init_cube( 0.0, 0.0, 0.0, 1);
     
@@ -1456,7 +1460,6 @@ void display(void)
     
     if( deferred_rendering )
     {
-        clear_g_buffer( 0.0, 0.0, 0.0, 1.0 );
         draw_g_buffer();
     }
     
@@ -1516,7 +1519,7 @@ static void Key(unsigned char key, int x, int y)
         case '0':       wave+=0.1;                                       break;
         case '9':       wave-=0.1;                                       break;
         case '6':       modulate = (1 - modulate);                       break;
-        case 'Q':       deferred_rendering = ( 1 - deferred_rendering );
+        case 'Q':       deferred_rendering = ( 1 - deferred_rendering ); break;
     }
     draw_one_frame = 1;
     glutPostRedisplay();
