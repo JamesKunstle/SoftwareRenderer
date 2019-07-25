@@ -366,6 +366,8 @@ POINT g_buffer[WIN_HEIGHT][WIN_WIDTH];
 
 int deferred_rendering = OFF;
 
+int use_hardware_opengl = OFF;
+
 /*************************************************************************/
 /* utility functions                                                     */
 /*************************************************************************/
@@ -409,6 +411,7 @@ void copy_vect(float i[4], float o[4]);
 #include "clipping_utilities.c"
 #include "texture_ingestion_utilities.c"
 #include "matrix_utilities.c"
+#include "initialize_gl.c"
 
 void draw_point(POINT *p, float blend_weight)
 {
