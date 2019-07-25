@@ -81,7 +81,6 @@ typedef struct gl_image {
     unsigned char   *data;
 } GL_IMAGE;
 
-
 typedef struct POINT{
     
     float           position[4];  // X / Y / Z / W | SCREEN COORDINATES
@@ -185,6 +184,8 @@ typedef struct matrix_4{
 /* global variables                                                      */
 /*************************************************************************/
 int window_size = 400;
+
+float zero_vect[4] = { 0.0, 0.0, 0.0, 1.0 };
 
 int Mojave_WorkAround = 1;
 
@@ -386,6 +387,8 @@ GL_IMAGE gl_texture;
 int back_face_culling =          OFF;
 
 int alpha_blending =             OFF;
+
+int tex_gen = OFF;
 
 
 /*************************************************************************/
@@ -676,6 +679,10 @@ float edgeFunction( float a[4], float b[4], float c[4] ) // used in draw_triangl
 void draw_triangle_barycentric( POINT *v0, POINT *v1, POINT *v2 )
 
 {
+    if( use_hardware_opengl )
+    {
+        draw_triangle_gl( v0, v1, v2 );
+    }
     
     int     minx = MIN3(v0->position[X],v1->position[X],v2->position[X]);
     
@@ -1431,11 +1438,15 @@ void display(void)
     if( draw_one_frame == 0 )
         return;
 
+    if( use_hardware_opengl )
     r_binary_text_file( &current_texture, "rocks_color.ppm" );          // READ IN TEXTURE AND BUMP MAP
     r_binary_text_file( &bumpmap, "rocks_bump.ppm");
     read_cube_texture_test();                                          // READ IN THE CUBE MAP
     
-    glClear(GL_COLOR_BUFFER_BIT );                                     // CLEAR BUFFERS AND INITIALIZE FILE
+    if( ! use_hardware_opengl ) glClear(GL_COLOR_BUFFER_BIT );                                     // CLEAR BUFFERS AND INITIALIZE FILE
+    
+    
+    
     clear_c_buff(0, 0, 0, 1);
     clear_d_buff(1000000);
     if( deferred_rendering )
@@ -1481,6 +1492,11 @@ void display(void)
 
     draw_model();                                                       // LOADS COLOR BUFFER, USES DRAW TRIANGLE ETC
     
+    
+    if( ! use_hardware_opengl )
+    {
+        
+    }
     if( deferred_rendering )
     {
         draw_g_buffer();

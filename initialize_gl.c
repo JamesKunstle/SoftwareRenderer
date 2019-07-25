@@ -181,7 +181,7 @@ void init_gl_state( void )
     
     for( int i = 0; i < 6; i++ )
     {
-        convert_image_to_gl( &mipmap[i], &gl_texture );
+        convert_image_to_gl( &cubemap[i], &gl_texture );
         
         glTexImage2D( GL_TEXTURE_CUBE_MAP_POSITIVE_X + i,
                      0,
@@ -348,7 +348,7 @@ void change_gl_state( void )
     /*
      * GL depth state
      */
-    if( depth_testing )
+    if( d_buff_active )
     {
         glEnable( GL_DEPTH_TEST );
     }
@@ -378,7 +378,7 @@ void change_gl_state( void )
         /*
          * cube map state
          */
-        if( env_mapping == ENV_MAP_CUBEMAP )
+        if( cube_mapping )
         {
             glDisable( GL_TEXTURE_2D );
             glBindTexture( GL_TEXTURE_2D, 0 );
@@ -398,7 +398,7 @@ void change_gl_state( void )
         }
         
         glTexEnvf( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, (modulate) ? GL_MODULATE : GL_DECAL );
-        glHint( GL_PERSPECTIVE_CORRECTION_HINT, (correction) ? GL_NICEST : GL_FASTEST );
+        glHint( GL_PERSPECTIVE_CORRECTION_HINT, (perspective_correct) ? GL_NICEST : GL_FASTEST );
         
         if( tex_gen )
         {
