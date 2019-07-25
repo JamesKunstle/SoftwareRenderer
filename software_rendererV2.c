@@ -1412,6 +1412,7 @@ void display(void)
     glClear(GL_COLOR_BUFFER_BIT );                                     // CLEAR BUFFERS AND INITIALIZE FILE
     clear_c_buff(0, 0, 0, 1);
     clear_d_buff(1000000);
+    clear_g_buffer( 0.0, 0.0, 0.0, 1.0 );
     
     init_sphere(1.0, 1.0, 0, 0, -10.0);                                // 3D OBJECT LOADED INTO THE VERTEX/TRIANGLE LIST
     //init_cube( 0.0, 0.0, 0.0, 1);
@@ -1449,8 +1450,13 @@ void display(void)
     
     scale_p_model(100.0);
 
-    
     draw_model();                                                       // LOADS COLOR BUFFER, USES DRAW TRIANGLE ETC
+    
+    if( deferred_rendering )
+    {
+        clear_g_buffer( 0.0, 0.0, 0.0, 1.0 );
+        draw_g_buffer();
+    }
     
     show_color_buffer();                                                // GIVES THE COLOR BUFFER TO GL TO DRAW
 
