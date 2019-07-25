@@ -1372,6 +1372,8 @@ void draw_g_buffer()
     int save_deferred = deferred_rendering;
     deferred_rendering = 0;
     
+    float temp_back_color[4] = {1.0, 0, 0, 1};
+    
     for( int j = 0; j < WIN_HEIGHT; j++ )
     {
         for( int i = 0; i < WIN_WIDTH; i++ )
