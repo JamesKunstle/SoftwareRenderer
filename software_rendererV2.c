@@ -378,7 +378,7 @@ int deferred_rendering =         OFF;
 
 int use_hardware_opengl =        OFF;
 
-int sw_vertex_processing =       OFF;
+int sw_vertex_processing =       ON;
 
 GLuint textureID;
 GLuint cubemapID;
@@ -1437,6 +1437,17 @@ void display(void)
     
     if( draw_one_frame == 0 )
         return;
+    
+    init_gl_state();                                                    // set up the state of GL
+    
+    if( use_hardware_opengl )
+    {
+        change_gl_state();
+    }
+    else
+    {
+        default_gl_state();                                             // sets the GL state to take input from the vertex method and nothing else.
+    }
 
     if( use_hardware_opengl )
     r_binary_text_file( &current_texture, "rocks_color.ppm" );          // READ IN TEXTURE AND BUMP MAP
@@ -1559,6 +1570,8 @@ static void Key(unsigned char key, int x, int y)
         case '9':       wave-=0.1;                                       break;
         case '6':       modulate = (1 - modulate);                       break;
         case 'Q':       deferred_rendering = ( 1 - deferred_rendering ); break;
+        case 'H':       use_hardware_opengl = ( 1 - use_hardware_opengl ); break;
+        case 'G':       sw_vertex_processing = ( 1 - sw_vertex_processing );    break;
     }
     draw_one_frame = 1;
     glutPostRedisplay();
