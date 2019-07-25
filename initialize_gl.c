@@ -1,40 +1,30 @@
-GLuint textureID;
-GLuint cubemapID;
-GL_IMAGE gl_texture;
-
-typedef struct gl_image {
-    int             width;
-    int             height;
-    unsigned char   *data;
-} GL_IMAGE;
-
 /*
  * draw_triangle_gl()
  */
 void draw_triangle_gl( POINT *v0, POINT *v1, POINT *v2 )
 {
     glBegin( GL_TRIANGLES );
-    glColor4fv( v0->color );
-    if( texturing ) glTexCoord4fv( v0->tex );
-    if( per_pixel_lighting ) glNormal3fv( v0->normal );
+    glColor4fv( v0->RGBA );
+    if( texturing ) glTexCoord4fv( v0->STRQ );
+    if( phong_lighting ) glNormal3fv( v0->normal );
     if( sw_vertex_processing )
-        glVertex3f( v0->pos[X] + 0.5, v0->pos[Y] + 0.5, v0->pos[Z] );
+        glVertex3f( v0->position[X] + 0.5, v0->position[Y] + 0.5, v0->position[Z] );
     else
         glVertex3f( v0->world[X], v0->world[Y], -v0->world[Z] );
     
-    glColor4fv( v1->color );
-    if( texturing ) glTexCoord4fv( v1->tex );
-    if( per_pixel_lighting ) glNormal3fv( v1->normal );
+    glColor4fv( v1->RGBA );
+    if( texturing ) glTexCoord4fv( v1->STRQ );
+    if( phong_lighting ) glNormal3fv( v1->normal );
     if( sw_vertex_processing )
-        glVertex3f( v1->pos[X] + 0.5, v1->pos[Y] + 0.5, v1->pos[Z] );
+        glVertex3f( v1->position[X] + 0.5, v1->position[Y] + 0.5, v1->position[Z] );
     else
         glVertex3f( v1->world[X], v1->world[Y], -v1->world[Z] );
     
-    glColor4fv( v2->color );
-    if( texturing ) glTexCoord4fv( v2->tex );
-    if( per_pixel_lighting ) glNormal3fv( v2->normal );
+    glColor4fv( v2->RGBA );
+    if( texturing ) glTexCoord4fv( v2->STRQ );
+    if( phong_lighting ) glNormal3fv( v2->normal );
     if( sw_vertex_processing )
-        glVertex3f( v2->pos[X] + 0.5, v2->pos[Y] + 0.5, v2->pos[Z] );
+        glVertex3f( v2->position[X] + 0.5, v2->position[Y] + 0.5, v2->position[Z] );
     else
         glVertex3f( v2->world[X], v2->world[Y], -v2->world[Z] );
     glEnd();
@@ -49,22 +39,22 @@ void draw_line_gl( POINT *start, POINT *end )
     /*
      * start vertex
      */
-    glColor4fv( start->color );
-    if( texturing ) glTexCoord4fv( start->tex );
-    if( per_pixel_lighting ) glNormal3fv( start->normal );
+    glColor4fv( start->RGBA );
+    if( texturing ) glTexCoord4fv( start->STRQ );
+    if( phong_lighting ) glNormal3fv( start->normal );
     if( sw_vertex_processing )
-        glVertex3f( start->pos[X] + 0.5, start->pos[Y] + 0.5, start->pos[Z] );
+        glVertex3f( start->position[X] + 0.5, start->position[Y] + 0.5, start->position[Z] );
     else
         glVertex3f( start->world[X], start->world[Y], -start->world[Z] );
     
     /*
      * end vertex
      */
-    glColor4fv( end->color );
-    if( texturing ) glTexCoord4fv( end->tex );
-    if( per_pixel_lighting ) glNormal3fv( end->normal );
+    glColor4fv( end->RGBA );
+    if( texturing ) glTexCoord4fv( end->STRQ );
+    if( phong_lighting ) glNormal3fv( end->normal );
     if( sw_vertex_processing )
-        glVertex3f( end->pos[X] + 0.5, end->pos[Y] + 0.5, end->pos[Z] );
+        glVertex3f( end->position[X] + 0.5, end->position[Y] + 0.5, end->position[Z] );
     else
         glVertex3f( end->world[X], end->world[Y], -end->world[Z] );
     glEnd();
@@ -134,7 +124,7 @@ void init_gl_state( void )
         glMatrixMode( GL_PROJECTION );
         glLoadIdentity();
         
-        if( perspective )
+        if( perspective_draw )
         {
             glFrustum( -1, 1, -1, 1, near, far );
         }
@@ -160,7 +150,7 @@ void init_gl_state( void )
     glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
     glTexEnvf( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_DECAL );
     
-    convert_image_to_gl( &texture, &gl_texture );
+    convert_image_to_gl( &current_texture, &gl_texture );
     
     glTexImage2D( GL_TEXTURE_2D,
                  0,
@@ -255,7 +245,7 @@ void default_gl_state( void )
         glMatrixMode( GL_PROJECTION );
         glLoadIdentity();
         
-        if( perspective )
+        if( perspective_draw )
         {
             glFrustum( -1, 1, -1, 1, near, far );
         }
@@ -331,7 +321,7 @@ void change_gl_state( void )
         glMatrixMode( GL_PROJECTION );
         glLoadIdentity();
         
-        if( perspective )
+        if( perspective_draw )
         {
             glFrustum( -1, 1, -1, 1, near, far );
         }
@@ -346,7 +336,7 @@ void change_gl_state( void )
     /*
      * GL polygon state
      */
-    if( wireframe )
+    if( !rasterize )
     {
         glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
     }
@@ -370,12 +360,12 @@ void change_gl_state( void )
     /*
      * GL shading state
      */
-    if( per_vertex_lighting )
+    if( phong_lighting )
     {
         glShadeModel( GL_FLAT );
     }
     
-    if( per_pixel_lighting )
+    if( phong_lighting )
     {
         glShadeModel( GL_SMOOTH );
     }
@@ -467,13 +457,13 @@ void change_gl_state( void )
     /*
      * GL lighting state
      */
-    if( per_vertex_lighting || per_pixel_lighting )
+    if( phong_lighting || face_lighting ) // jamesk
     {
         float gl_light[4];
         
-        if( local_light )
+        if( local_lighting )
         {
-            copy_vect( light_pos, gl_light );
+            copy_vect( light_position, gl_light );
         }
         else
         {
@@ -497,7 +487,7 @@ void change_gl_state( void )
         glMaterialfv( GL_FRONT_AND_BACK, GL_AMBIENT,    material_ambient    );
         glMaterialfv( GL_FRONT_AND_BACK, GL_DIFFUSE,    material_diffuse    );
         
-        if( draw_specular )
+        if( specular_lighting )
         {
             glMaterialfv( GL_FRONT_AND_BACK, GL_SPECULAR,   material_specular   );
             glMaterialf(  GL_FRONT_AND_BACK, GL_SHININESS,  shinyness           );

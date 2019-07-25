@@ -75,6 +75,13 @@ b = temp;       \
 /* structs                                                               */
 /*************************************************************************/
 
+typedef struct gl_image {
+    int             width;
+    int             height;
+    unsigned char   *data;
+} GL_IMAGE;
+
+
 typedef struct POINT{
     
     float           position[4];  // X / Y / Z / W | SCREEN COORDINATES
@@ -359,14 +366,27 @@ TIMERSENSE current_savefile;
 float light_position[4] = {1, 1, 0, 1.0};
 
 int local_lighting =            OFF;
+
+int specular_lighting =          OFF;
 //
 
 
 POINT g_buffer[WIN_HEIGHT][WIN_WIDTH];
 
-int deferred_rendering = OFF;
+int deferred_rendering =         OFF;
 
-int use_hardware_opengl = OFF;
+int use_hardware_opengl =        OFF;
+
+int sw_vertex_processing =       OFF;
+
+GLuint textureID;
+GLuint cubemapID;
+GL_IMAGE gl_texture;
+
+int back_face_culling =          OFF;
+
+int alpha_blending =             OFF;
+
 
 /*************************************************************************/
 /* utility functions                                                     */
