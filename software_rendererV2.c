@@ -67,6 +67,10 @@ b = temp;       \
 
 #define CLIPPED 57
 
+#define WIN_HEIGHT 800
+
+#define WIN_WIDTH 800
+
 /*************************************************************************/
 /* structs                                                               */
 /*************************************************************************/
@@ -90,6 +94,7 @@ typedef struct POINT{
     float           normal[4];
     
     float           dist[6];      // the distance of a point-vertex to each of the 6 points of the frustum.
+    int             rendered;
     
 }POINT;
 
@@ -356,6 +361,10 @@ float light_position[4] = {1, 1, 0, 1.0};
 int local_lighting =            OFF;
 //
 
+
+POINT g_buffer[WIN_HEIGHT][WIN_WIDTH];
+int deferred_rendering = OFF;
+
 /*************************************************************************/
 /* utility functions                                                     */
 /*************************************************************************/
@@ -421,6 +430,13 @@ void draw_point(POINT *p, float blend_weight)
     
     if( d_buff_active == ON && d_buff[y][x] < p->position[Z] )
     {
+        return;
+    }
+    
+    if( deferred_rendering )
+    {
+        p->rendered = 1;
+        g_buffer[y][x] = *p;
         return;
     }
     
@@ -1339,8 +1355,39 @@ void set_camera_matrix(MATRIX_4 m, float eye[4], float lookat[4], float up[4])
     // using this after rotation and translation will allow all of our other math to work.
 }
 
+void clear_g_buffer( float r, float g, float b, float a )
+{
+    for( int j = 0; j < WIN_HEIGHT; j++ )
+    {
+        for( int i = 0; i < WIN_WIDTH; i++ )
+        {
+            set_vect_4( g_buffer[j][j].RGBA, r, g, b, a );
+            g_buffer[j][i].rendered = 0;
+        }
+    }
+}
 
-
+void draw_g_buffer()
+{
+    int save_deferred = deferred_rendering;
+    deferred_rendering = 0;
+    
+    for( int j = 0; j < WIN_HEIGHT; j++ )
+    {
+        for( int i = 0; i < WIN_WIDTH; i++ )
+        {
+            if( g_buffer[j][i].rendered == 0 )
+            {
+                copy_vect( g_buffer[j][i].RGBA, c_buff[j][i] );
+            }
+            else
+            {
+                draw_point( &g_buffer[j][i], 1.0 );
+            }
+        }
+    }
+    deferred_rendering = save_deferred;
+}
 /*************************************************************************/
 /* GLUT functions                                                        */
 /*************************************************************************/
@@ -1461,6 +1508,7 @@ static void Key(unsigned char key, int x, int y)
         case '0':       wave+=0.1;                                       break;
         case '9':       wave-=0.1;                                       break;
         case '6':       modulate = (1 - modulate);                       break;
+        case 'Q':       deferred_rendering = ( 1 - deferred_rendering );
     }
     draw_one_frame = 1;
     glutPostRedisplay();
