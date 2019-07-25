@@ -1432,7 +1432,19 @@ void draw_g_buffer()
 /* Read-out of options that have been enabled for the model. */
 void print_stats()
 {
-    
+    printf("==============================================\n");
+    printf("Depth-buffering:                        %d\n", d_buff_active);
+    printf("Color-buffer blending:                  %d\n", c_buff_blending);
+    printf("Texturing enabled:                      %d\n", texturing);
+    printf("Rasterization enabled:                  %d\n", rasterize);
+    printf("Perspective enabled:                    %d\n", perspective_draw);
+    printf("Perspective-correct enabled:            %d\n", perspective_correct);
+    printf("Per-vertex lighting:                    %d\n", phong_lighting);
+    printf("Face lighting:                          %d\n", face_lighting);
+    printf("Fog enabled:                            %d\n", fog);
+    printf("Bump-mapping enabled:                   %d\n", bumpmapping);
+    printf("Cube-mapping enabled:                   %d\n", cube_mapping);
+    printf("==============================================^^^^^^^^^^^^^^\n");
 }
 
 /*************************************************************************/
@@ -1455,6 +1467,7 @@ void display(void)
     clear_c_buff(0, 0, 0, 1);                                                // clear the color and depth buffers
     clear_d_buff(1000000);
     
+    print_stats();
     if( deferred_rendering )
     {
         clear_g_buffer( 0.0, 0.0, 0.0, 1.0 );
