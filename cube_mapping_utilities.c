@@ -69,33 +69,23 @@ void cube_map_vect( float v[4], float tex[4], int *index )
 void read_cube_texture_test()
 {
     r_binary_text_file_two_row( &cubemap[0], "test_right.ppm");
-    printf("Texture 1 in.\n");
+
     r_binary_text_file_two_row( &cubemap[1], "test_left.ppm");
-    printf("Texture 2 in.\n");
+
     r_binary_text_file_two_row( &cubemap[2], "test_top.ppm");
-    printf("Texture 3 in.\n");
+
     r_binary_text_file_two_row( &cubemap[3], "test_bottom.ppm");
-    printf("Texture 4 in.\n");
     r_binary_text_file_two_row( &cubemap[4], "test_back.ppm");
-    printf("Texture 5 in.\n");
     r_binary_text_file_two_row( &cubemap[5], "test_front.ppm"); // the cube_map IMAGE array should contain all of the requisite textures.
-    printf("Texture 6 in.\n");
 }
 void read_cube_texture_sky()
 {
-    printf("Starting.\n");
     r_binary_text_file_two_row( &cubemap[0], "sky_right.ppm");
-    printf("Texture 1 in.\n");
     r_binary_text_file_two_row( &cubemap[1], "sky_left.ppm");
-    printf("Texture 2 in.\n");
     r_binary_text_file_two_row( &cubemap[2], "sky_top.ppm");
-    printf("Texture 3 in.\n");
     r_binary_text_file_two_row( &cubemap[3], "sky_bottom.ppm");
-    printf("Texture 4 in.\n");
     r_binary_text_file_two_row( &cubemap[4], "sky_back.ppm");
-    printf("Texture 5 in.\n");
     r_binary_text_file_two_row( &cubemap[5], "sky_front.ppm"); // the cube_map IMAGE array should contain all of the requisite textures.
-    printf("Texture 6 in.\n");
 }
 
 void naive_map_vect(float normal[4], float tex[4])

@@ -81,6 +81,7 @@ typedef struct gl_image {
     unsigned char   *data;
 } GL_IMAGE;
 
+
 typedef struct POINT{
     
     float           position[4];  // X / Y / Z / W | SCREEN COORDINATES
@@ -384,11 +385,11 @@ GLuint textureID;
 GLuint cubemapID;
 GL_IMAGE gl_texture;
 
-int back_face_culling =          OFF;
+int back_face_culling =          OFF;   // jamesk   placeholder global variable for something that Chris' implementation uses
 
-int alpha_blending =             OFF;
+int alpha_blending =             OFF;   // jamesk   placeholder global variable for something that Chris' implementation uses
 
-int tex_gen = OFF;
+int tex_gen =                    OFF;   // jamesk   placeholder global variable for something that Chris' implementation uses
 
 
 /*************************************************************************/
@@ -460,7 +461,7 @@ void draw_point(POINT *p, float blend_weight)
         return;
     }
     
-    if( deferred_rendering )
+    if( deferred_rendering )                                    // DEFERRED RENDERING
     {
         p->rendered = 1;
         g_buffer[y][x] = *p;
@@ -1438,43 +1439,42 @@ void display(void)
     if( draw_one_frame == 0 )
         return;
     
-    init_gl_state();                                                    // set up the state of GL
+    clear_c_buff(0, 0, 0, 1);                                                // clear the color and depth buffers
+    clear_d_buff(1000000);
     
-    if( use_hardware_opengl )
+    
+    init_gl_state();                                                          // set up the state of GL
+    
+    if( use_hardware_opengl )                                                // if we're passing GL vertices for triangles
     {
         change_gl_state();
     }
     else
     {
-        default_gl_state();                                             // sets the GL state to take input from the vertex method and nothing else.
+        default_gl_state();                                                   // if we're delivering pixels to GL
     }
 
-    if( use_hardware_opengl )
-    r_binary_text_file( &current_texture, "rocks_color.ppm" );          // READ IN TEXTURE AND BUMP MAP
+    r_binary_text_file( &current_texture, "rocks_color.ppm" );                // READ IN TEXTURE AND BUMP MAP
     r_binary_text_file( &bumpmap, "rocks_bump.ppm");
-    read_cube_texture_test();                                          // READ IN THE CUBE MAP
+    read_cube_texture_test();                                                    // READ IN THE CUBE MAP
     
-    if( ! use_hardware_opengl ) glClear(GL_COLOR_BUFFER_BIT );                                     // CLEAR BUFFERS AND INITIALIZE FILE
+    if( !use_hardware_opengl )
+    {
+        glClear(GL_COLOR_BUFFER_BIT );                                           // CLEAR BUFFERS AND INITIALIZE FILE
+    }
     
-    
-    
-    clear_c_buff(0, 0, 0, 1);
-    clear_d_buff(1000000);
     if( deferred_rendering )
     {
         clear_g_buffer( 0.0, 0.0, 0.0, 1.0 );
     }
-  
-    init_sphere(1.0, 1.0, 0, 0, -10.0);                                // 3D OBJECT LOADED INTO THE VERTEX/TRIANGLE LIST
+    
+    init_sphere(1.0, 1.0, 0, 0, -10.0);                                          // 3D OBJECT LOADED INTO THE VERTEX/TRIANGLE LIST
     //init_cube( 0.0, 0.0, 0.0, 1);
     
-//    cal_face_normal();
-//    calculate_vertex_normals();                                        // 3D MODEL HAS ALL NORMALS CALUCULATED
-//
-    rotate_model_xy(xangle, yangle, zangle);                           // IT IS ROTATED
-    t_model(translation_value - 30);                                        // IT IS TRANSLATED
+    rotate_model_xy(xangle, yangle, zangle);                                      // IT IS ROTATED
+    t_model(translation_value - 30);                                             // IT IS TRANSLATED
 //    rotate_model_matrix(xangle, yangle, zangle);
-//    t_model_matrix(translation_value - 30);                              // matrix versions of^
+//    t_model_matrix(translation_value - 30);                                    // matrix versions of^
     
     //rotate_translate_matrix( xangle, yangle, zangle, translation_value - 30 );
     
@@ -1482,15 +1482,15 @@ void display(void)
 //    set_camera_matrix( camera_matrix, eye, lookat, global_camera.up );
     
     cal_face_normal();
-    calculate_vertex_normals();                                         // NORMALS RECALCULATED
+    calculate_vertex_normals();                                                  // NORMALS RECALCULATED
     
     // FROM HERE ON, BEGINNING TO WORK WITH SCREEN COORDINATES
     
     setup_clip_frustum();
-    calculate_clip_distances();                                         // CALCULATES WHICH TRIANGLES ARE WITHIN BOUNDS
+    calculate_clip_distances();                                                 // CALCULATES WHICH TRIANGLES ARE WITHIN BOUNDS
     
     
-    if(perspective_draw == ON)
+    if(perspective_draw == ON)                                                  // FORM MODEL PERSPECTIVE / P_CORRECT
     {
         p_form_model(near, far);
     }
@@ -1504,17 +1504,15 @@ void display(void)
     draw_model();                                                       // LOADS COLOR BUFFER, USES DRAW TRIANGLE ETC
     
     
-    if( ! use_hardware_opengl )
+    if( !use_hardware_opengl )                                        
     {
+        if( deferred_rendering )
+        {
+            draw_g_buffer();
+        }
         
+        show_color_buffer();                                                // GIVES THE COLOR BUFFER TO GL TO DRAW
     }
-    if( deferred_rendering )
-    {
-        draw_g_buffer();
-    }
-    
-    show_color_buffer();                                                // GIVES THE COLOR BUFFER TO GL TO DRAW
-
     numvertices = 0;                                                    // READY FOR NEXT RENDER
     numtriangles = 0;
     

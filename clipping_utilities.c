@@ -225,8 +225,6 @@ void calculate_clip_distances( void )
     /*
      * for each triangle, check if it's inside, outside, or needs to be clipped
      */
-    
-    printf("Number of vertices before loop: %d\n", numvertices);
     for( int i = 0; i < limit; i++ )
     {
         verts[0] = vertex_list[triangle_list[i].vertex[0]];
@@ -247,7 +245,6 @@ void calculate_clip_distances( void )
         {
             triangle_list[i].clip_flag = CLIPPED;
             int num_clipped = tri_clip_frustum( verts );
-            printf("num_clipped: %d\n", num_clipped);
             if( num_clipped == 0 )
                 continue;
             
