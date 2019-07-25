@@ -389,7 +389,7 @@ int back_face_culling =          OFF;   // jamesk   placeholder global variable 
 
 int alpha_blending =             OFF;   // jamesk   placeholder global variable for something that Chris' implementation uses
 
-int tex_gen =                    OFF;   // jamesk   placeholder global variable for something that Chris' implementation uses
+int tex_gen =                    OFF;   // jamesk   placeholder for GL-supported texture coordinate generation
 
 
 /*************************************************************************/
@@ -788,6 +788,12 @@ void draw_triangle_barycentric( POINT *v0, POINT *v1, POINT *v2 )
 
 void draw_line_from_Chris( POINT *start, POINT *end, int mode, float blend_weight )
 {
+    
+    if( use_hardware_opengl )
+    {
+        draw_line_gl( start, end );                 // if we're using GL to draw, bypass interpolation
+    }
+    
     POINT   delta;
     POINT   step;
     POINT   p;
@@ -1422,6 +1428,13 @@ void draw_g_buffer()
     }
     deferred_rendering = save_deferred;
 }
+
+/* Read-out of options that have been enabled for the model. */
+void print_stats()
+{
+    
+}
+
 /*************************************************************************/
 /* GLUT functions                                                        */
 /*************************************************************************/
@@ -1442,6 +1455,12 @@ void display(void)
     clear_c_buff(0, 0, 0, 1);                                                // clear the color and depth buffers
     clear_d_buff(1000000);
     
+    if( deferred_rendering )
+    {
+        clear_g_buffer( 0.0, 0.0, 0.0, 1.0 );
+    }
+    
+    
     
     init_gl_state();                                                          // set up the state of GL
     
@@ -1452,22 +1471,14 @@ void display(void)
     else
     {
         default_gl_state();                                                   // if we're delivering pixels to GL
+        glClear(GL_COLOR_BUFFER_BIT );
     }
 
     r_binary_text_file( &current_texture, "rocks_color.ppm" );                // READ IN TEXTURE AND BUMP MAP
     r_binary_text_file( &bumpmap, "rocks_bump.ppm");
     read_cube_texture_test();                                                    // READ IN THE CUBE MAP
     
-    if( !use_hardware_opengl )
-    {
-        glClear(GL_COLOR_BUFFER_BIT );                                           // CLEAR BUFFERS AND INITIALIZE FILE
-    }
-    
-    if( deferred_rendering )
-    {
-        clear_g_buffer( 0.0, 0.0, 0.0, 1.0 );
-    }
-    
+
     init_sphere(1.0, 1.0, 0, 0, -10.0);                                          // 3D OBJECT LOADED INTO THE VERTEX/TRIANGLE LIST
     //init_cube( 0.0, 0.0, 0.0, 1);
     
@@ -1499,12 +1510,12 @@ void display(void)
         form_model(1.0);
     }
     
-    scale_p_model(100.0);
+    scale_p_model(100.0);                                               // scales model in position vectors after formation.
 
     draw_model();                                                       // LOADS COLOR BUFFER, USES DRAW TRIANGLE ETC
     
     
-    if( !use_hardware_opengl )                                        
+    if( !use_hardware_opengl )
     {
         if( deferred_rendering )
         {
@@ -1522,6 +1533,7 @@ void display(void)
     glutSwapBuffers();
     glutPostRedisplay();//Necessary for Mojave.
     draw_one_frame = 0;
+    glClear(GL_COLOR_BUFFER_BIT );
 }
 
 /*
@@ -1568,7 +1580,7 @@ static void Key(unsigned char key, int x, int y)
         case '9':       wave-=0.1;                                       break;
         case '6':       modulate = (1 - modulate);                       break;
         case 'Q':       deferred_rendering = ( 1 - deferred_rendering ); break;
-        case 'H':       use_hardware_opengl = ( 1 - use_hardware_opengl ); break;
+        case 'H':       use_hardware_opengl = ( 1 - use_hardware_opengl );      break;
         case 'G':       sw_vertex_processing = ( 1 - sw_vertex_processing );    break;
     }
     draw_one_frame = 1;

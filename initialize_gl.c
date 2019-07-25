@@ -360,7 +360,7 @@ void change_gl_state( void )
     /*
      * GL shading state
      */
-    if( phong_lighting )
+    if( face_lighting )
     {
         glShadeModel( GL_FLAT );
     }
@@ -457,7 +457,7 @@ void change_gl_state( void )
     /*
      * GL lighting state
      */
-    if( phong_lighting || face_lighting ) // jamesk
+    if( phong_lighting || local_lighting ) // jamesk
     {
         float gl_light[4];
         

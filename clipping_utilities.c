@@ -268,12 +268,10 @@ void calculate_clip_distances( void )
                 
                 add_triangle( new_verts, new_verts+1, new_verts+2 );
                 
-                printf("Adding triangle = %d %d %d %d\n", new_verts, new_verts+1, new_verts+2, new_tri );
                 copy_vect( triangle_list[i].normal, triangle_list[new_tri].normal    );
                 //copy_vect( triangle_list[i].light,  triangle_list[new_tri].light     );
                 triangle_list[new_tri].clip_flag = IN;
             }
         }
     }
-    printf("Number of vertices after loop: %d\n", numvertices);
 }
