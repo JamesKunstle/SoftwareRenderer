@@ -1462,6 +1462,8 @@ void print_stats()
     printf("Use-hardware enabled:            (H)       %d\n", use_hardware_opengl);
     printf("_______________                  ___       ___\n");
     printf("Software-vertex-processing:      (G)       %d\n", sw_vertex_processing);
+    printf("_______________                  ___       ___\n");
+    printf("Cube-mapping                     (C)       %d\n", cube_mapping);
     printf("==============================================^^^^^^^^^^^^^^\n");
 }
 
@@ -1579,13 +1581,24 @@ void display(void)
         default_gl_state();                                                   // if we're delivering pixels to GL
         glClear(GL_COLOR_BUFFER_BIT );
     }
-
-    r_binary_text_file( &starter_texture, "rocks_color.ppm" );                // READ IN TEXTURE AND BUMP MAP
-    r_binary_text_file( &bumpmap, "rocks_bump.ppm");
-    read_cube_texture_test();                                                    // READ IN THE CUBE MAP
+    
+    if( texturing )
+    {
+        
+        r_binary_text_file( &starter_texture, "rocks_color.ppm" );                // READ IN TEXTURE AND BUMP MAP
+    }
+    
+    if( bumpmapping)
+    {
+        r_binary_text_file( &bumpmap, "rocks_bump.ppm");
+    }
+    if(cube_mapping)
+    {
+     read_cube_texture_test();                                                    // READ IN THE CUBE MAP
+    }
     
 
-    init_sphere(1.0, 4.0, 0, 0, -10.0);                                          // 3D OBJECT LOADED INTO THE VERTEX/TRIANGLE LIST
+    init_sphere(1.0, 2.0, 0, 0, -10.0);                                          // 3D OBJECT LOADED INTO THE VERTEX/TRIANGLE LIST
     //init_cube( 0.0, 0.0, 0.0, 1);
     
     rotate_model_xy(xangle, yangle, zangle);                                      // IT IS ROTATED
@@ -1631,7 +1644,7 @@ void display(void)
         show_color_buffer();                                                // GIVES THE COLOR BUFFER TO GL TO DRAW
     }
     stop_timer( &sw_renderer_timer );
-    printf("fps = %f\n", 1 / elapsed_time( &sw_renderer_timer ));
+    printf("fps = %.2f\n", 1 / elapsed_time( &sw_renderer_timer ));
     numvertices = 0;                                                    // READY FOR NEXT RENDER
     numtriangles = 0;
     
@@ -1678,11 +1691,11 @@ static void Key(unsigned char key, int x, int y)
         case '@':       naive_mapping = OFF; cylindrical_mapping = ON; spherical_mapping = OFF; cube_mapping = OFF; break;
         case '#':       naive_mapping = OFF; cylindrical_mapping = OFF; spherical_mapping = ON; cube_mapping = OFF;break;
             
-        case 'P':       phong_lighting = ON; face_lighting = OFF;        break;
-        case 'F':       face_lighting = ON; phong_lighting = OFF;        break;
+        case 'P':       phong_lighting = (1 - phong_lighting); face_lighting = OFF;        break;
+        case 'F':       face_lighting = (1 - face_lighting); phong_lighting = OFF;        break;
         case 'D':       depth_of_field = ( 1 - depth_of_field);          break;
         case 'R':       reflection = 1 - reflection;                     break;
-        case 'C':       cube_mapping = ON; naive_mapping = OFF; cylindrical_mapping = OFF; spherical_mapping = OFF; break;
+        case 'C':       cube_mapping = ( 1 - cube_mapping); naive_mapping = OFF; cylindrical_mapping = OFF; spherical_mapping = OFF; break;
             
         case '0':       wave+=0.1;                                       break;
         case '9':       wave-=0.1;                                       break;
