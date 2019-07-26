@@ -149,13 +149,13 @@ typedef struct timer{
 
 typedef struct timersense{           // struct that will store consecutive times recorded using the timers.
     
-    float           sw_time[1000];   // stored rendering times of the software renderer.
+    float           time1[1000];
     
-    float           gl_time[1000];   // stored rendering times of GL
+    float           time2[1000];
     
-    int             current_sw;      // location of next save location for swr time.
+    int             time1_current;      // location of next save location for swr time.
     
-    int             current_gl;      // location of next save location for glr time.
+    int             time2_current;      // location of next save location for glr time.
     
 }TIMERSENSE;
 
@@ -393,6 +393,8 @@ int alpha_blending =             OFF;   // jamesk   placeholder global variable 
 int tex_gen =                    OFF;   // jamesk   placeholder for GL-supported texture coordinate generation
 
 GL_IMAGE current_gl_image;
+
+int num_renders = 0;
 /*************************************************************************/
 /* utility functions                                                     */
 /*************************************************************************/
@@ -1536,10 +1538,11 @@ void gl_printf( int x, int y, char *s )
     
 }
 
-void stats()
+void render_counter_reset()
 {
-    
+    num_renders = 1;
 }
+
 
 /*************************************************************************/
 /* GLUT functions                                                        */
@@ -1563,6 +1566,7 @@ void display(void)
     clear_d_buff(1000000);
     
     print_stats();
+    
     if( deferred_rendering )
     {
         clear_g_buffer( 0.0, 0.0, 0.0, 1.0 );
@@ -1602,9 +1606,9 @@ void display(void)
     //init_cube( 0.0, 0.0, 0.0, 1);
     
     rotate_model_xy(xangle, yangle, zangle);                                      // IT IS ROTATED
-    t_model(translation_value - 30);                                             // IT IS TRANSLATED
+    t_model(translation_value - 30);                                              // IT IS TRANSLATED
 //    rotate_model_matrix(xangle, yangle, zangle);
-//    t_model_matrix(translation_value - 30);                                    // matrix versions of^
+//    t_model_matrix(translation_value - 30);                                     // matrix versions of^
     
     //rotate_translate_matrix( xangle, yangle, zangle, translation_value - 30 );
     
@@ -1612,12 +1616,15 @@ void display(void)
 //    set_camera_matrix( camera_matrix, eye, lookat, global_camera.up );
     
     cal_face_normal();
-    calculate_vertex_normals();                                                  // NORMALS RECALCULATED
+    calculate_vertex_normals();                                                   // NORMALS RECALCULATED
     
     // FROM HERE ON, BEGINNING TO WORK WITH SCREEN COORDINATES
     
-    setup_clip_frustum();
-    calculate_clip_distances();                                                 // CALCULATES WHICH TRIANGLES ARE WITHIN BOUNDS
+    if( !use_hardware_opengl )
+    {
+        setup_clip_frustum();
+        calculate_clip_distances();                                                // CALCULATES WHICH TRIANGLES ARE WITHIN BOUNDS
+    }
     
     
     if(perspective_draw == ON)                                                  // FORM MODEL PERSPECTIVE / P_CORRECT
@@ -1655,6 +1662,8 @@ void display(void)
     glutPostRedisplay();//Necessary for Mojave.
     draw_one_frame = 0;
     glClear(GL_COLOR_BUFFER_BIT );
+    printf("Scenes rendered: %d\n", num_renders);
+    num_renders++;
 }
 
 /*
@@ -1703,6 +1712,7 @@ static void Key(unsigned char key, int x, int y)
         case 'Q':       deferred_rendering = ( 1 - deferred_rendering ); break;
         case 'H':       use_hardware_opengl = ( 1 - use_hardware_opengl );      break;
         case 'G':       sw_vertex_processing = ( 1 - sw_vertex_processing );    break;
+        case '/':       render_counter_reset();                          break;
     }
     draw_one_frame = 1;
     glutPostRedisplay();

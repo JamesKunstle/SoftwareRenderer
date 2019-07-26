@@ -188,7 +188,7 @@ void init_gl_state( void )
     
     for( int i = 0; i < 6; i++ )
     {
-        convert_image_to_gl( &cubemap[i], &gl_texture );
+        convert_image_to_gl( &cubemap[i], &gl_texture ); // jamesk converting the whole cubemap to the correct GL texture.
         
         glTexImage2D( GL_TEXTURE_CUBE_MAP_POSITIVE_X + i,
                      0,
