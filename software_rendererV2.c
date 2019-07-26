@@ -1433,17 +1433,31 @@ void draw_g_buffer()
 void print_stats()
 {
     printf("==============================================\n");
-    printf("Depth-buffering:                        %d\n", d_buff_active);
-    printf("Color-buffer blending:                  %d\n", c_buff_blending);
-    printf("Texturing enabled:                      %d\n", texturing);
-    printf("Rasterization enabled:                  %d\n", rasterize);
-    printf("Perspective enabled:                    %d\n", perspective_draw);
-    printf("Perspective-correct enabled:            %d\n", perspective_correct);
-    printf("Per-vertex lighting:                    %d\n", phong_lighting);
-    printf("Face lighting:                          %d\n", face_lighting);
-    printf("Fog enabled:                            %d\n", fog);
-    printf("Bump-mapping enabled:                   %d\n", bumpmapping);
-    printf("Cube-mapping enabled:                   %d\n", cube_mapping);
+    printf("Depth-buffering:                 (m)       %d\n", d_buff_active);
+    printf("_______________                  ___       ___\n");
+    printf("Color-buffer blending:           (n)       %d\n", c_buff_blending);
+    printf("_______________                  ___       ___\n");
+    printf("Texturing enabled:               (b)       %d\n", texturing);
+    printf("_______________                  ___       ___\n");
+    printf("Rasterization enabled:           (r)       %d\n", rasterize);
+    printf("_______________                  ___       ___\n");
+    printf("Perspective enabled:             (p)       %d\n", perspective_draw);
+    printf("_______________                  ___       ___\n");
+    printf("Perspective-correct enabled:     (l)       %d\n", perspective_correct);
+    printf("_______________                  ___       ___\n");
+    printf("Per-vertex lighting:             (P)       %d\n", phong_lighting);
+    printf("_______________                  ___       ___\n");
+    printf("Face lighting:                   (F)       %d\n", face_lighting);
+    printf("_______________                  ___       ___\n");
+    printf("Bump-mapping / mod enabled:      (6)       %d\n", bumpmapping);
+    printf("_______________                  ___       ___\n");
+    printf("Cube-mapping enabled:            (#)       %d\n", cube_mapping);
+    printf("_______________                  ___       ___\n");
+    printf("Deferred rendering enabled:      (Q)       %d\n", deferred_rendering);
+    printf("_______________                  ___       ___\n");
+    printf("Use-hardware enabled:            (H)       %d\n", use_hardware_opengl);
+    printf("_______________                  ___       ___\n");
+    printf("Software-vertex-processing:      (G)       %d\n", sw_vertex_processing);
     printf("==============================================^^^^^^^^^^^^^^\n");
 }
 
