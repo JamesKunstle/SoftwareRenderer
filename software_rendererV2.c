@@ -1432,7 +1432,33 @@ void draw_g_buffer()
 /* Read-out of options that have been enabled for the model. */
 void print_stats()
 {
-    
+    printf("==============================================\n");
+    printf("Depth-buffering:                 (m)       %d\n", d_buff_active);
+    printf("_______________                  ___       ___\n");
+    printf("Color-buffer blending:           (n)       %d\n", c_buff_blending);
+    printf("_______________                  ___       ___\n");
+    printf("Texturing enabled:               (b)       %d\n", texturing);
+    printf("_______________                  ___       ___\n");
+    printf("Rasterization enabled:           (r)       %d\n", rasterize);
+    printf("_______________                  ___       ___\n");
+    printf("Perspective enabled:             (p)       %d\n", perspective_draw);
+    printf("_______________                  ___       ___\n");
+    printf("Perspective-correct enabled:     (l)       %d\n", perspective_correct);
+    printf("_______________                  ___       ___\n");
+    printf("Per-vertex lighting:             (P)       %d\n", phong_lighting);
+    printf("_______________                  ___       ___\n");
+    printf("Face lighting:                   (F)       %d\n", face_lighting);
+    printf("_______________                  ___       ___\n");
+    printf("Bump-mapping / mod enabled:      (6)       %d\n", bumpmapping);
+    printf("_______________                  ___       ___\n");
+    printf("Cube-mapping enabled:            (#)       %d\n", cube_mapping);
+    printf("_______________                  ___       ___\n");
+    printf("Deferred rendering enabled:      (Q)       %d\n", deferred_rendering);
+    printf("_______________                  ___       ___\n");
+    printf("Use-hardware enabled:            (H)       %d\n", use_hardware_opengl);
+    printf("_______________                  ___       ___\n");
+    printf("Software-vertex-processing:      (G)       %d\n", sw_vertex_processing);
+    printf("==============================================^^^^^^^^^^^^^^\n");
 }
 
 /*************************************************************************/
@@ -1455,6 +1481,7 @@ void display(void)
     clear_c_buff(0, 0, 0, 1);                                                // clear the color and depth buffers
     clear_d_buff(1000000);
     
+    print_stats();
     if( deferred_rendering )
     {
         clear_g_buffer( 0.0, 0.0, 0.0, 1.0 );

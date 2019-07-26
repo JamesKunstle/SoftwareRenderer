@@ -48,6 +48,7 @@ void r_binary_text_file(IMAGE *image, char *name) // read a binary ppm texture
                 image->data[y][x][R] = data[n++];
                 image->data[y][x][G] = data[n++];
                 image->data[y][x][B] = data[n++];
+                image->data[y][x][A] = 1; 
             }
         }
         fclose(fp);
