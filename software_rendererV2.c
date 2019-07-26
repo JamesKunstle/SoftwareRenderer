@@ -23,6 +23,7 @@
 #include <limits.h>
 #include <stdio.h>
 #include <sys/time.h>
+#include <strings.h>
 /*************************************************************************/
 /* defines                                                               */
 /*************************************************************************/
@@ -391,7 +392,7 @@ int alpha_blending =             OFF;   // jamesk   placeholder global variable 
 
 int tex_gen =                    OFF;   // jamesk   placeholder for GL-supported texture coordinate generation
 
-
+GL_IMAGE current_gl_image;
 /*************************************************************************/
 /* utility functions                                                     */
 /*************************************************************************/
@@ -1162,6 +1163,9 @@ void init_sphere(float scale, float radius, float centerx, float centery, float 
             
             vertex_list[c_v].STRQ[S] = u;
             vertex_list[c_v].STRQ[T] = v;
+            vertex_list[c_v].STRQ[2] = 0.0;
+            vertex_list[c_v].STRQ[3] = 1.0;
+            
             
             
             vertex_list[c_v].RGBA[R] = 1.0;
@@ -1449,7 +1453,7 @@ void print_stats()
     printf("_______________                  ___       ___\n");
     printf("Face lighting:                   (F)       %d\n", face_lighting);
     printf("_______________                  ___       ___\n");
-    printf("Bump-mapping / mod enabled:      (6)       %d\n", bumpmapping);
+    printf("Bump-mapping / mod enabled:      (6)       %d\n", modulate);
     printf("_______________                  ___       ___\n");
     printf("Cube-mapping enabled:            (#)       %d\n", cube_mapping);
     printf("_______________                  ___       ___\n");
@@ -1461,6 +1465,80 @@ void print_stats()
     printf("==============================================^^^^^^^^^^^^^^\n");
 }
 
+void gl_printf( int x, int y, char *s )
+
+{
+    
+    double len = strlen( s );
+    
+    
+    
+    glDisable( GL_LIGHTING );
+    
+    
+    
+    glColor4f( 1, 1, 1, 1 );
+    
+    
+    
+    glMatrixMode( GL_PROJECTION );
+    
+    glPushMatrix();
+    
+    glLoadIdentity();
+    
+    
+    
+    gluOrtho2D( 0, WIN_WIDTH, 0, WIN_HEIGHT );
+    
+    
+    
+    glMatrixMode( GL_MODELVIEW );
+    
+    glPushMatrix();
+    
+    glLoadIdentity();
+    
+    
+    
+    glRasterPos2i( x, y );
+    
+    
+    
+    for( int i = 0; i < len; i++ )
+        
+    {
+        
+        glutBitmapCharacter( GLUT_BITMAP_HELVETICA_10, s[i] );
+        
+    }
+    
+    
+    
+    glPopMatrix();
+    
+    glMatrixMode( GL_PROJECTION );
+    
+    glPopMatrix();
+    
+    glMatrixMode( GL_MODELVIEW );
+    
+    
+    if( face_lighting || phong_lighting )
+        
+    {
+        
+        glEnable( GL_LIGHTING );
+        
+    }
+    
+}
+
+void stats()
+{
+    
+}
+
 /*************************************************************************/
 /* GLUT functions                                                        */
 /*************************************************************************/
@@ -1469,6 +1547,7 @@ void print_stats()
  */
 void display(void)
 {
+    start_timer( &sw_renderer_timer );
     if( Mojave_WorkAround )
     {
         glutReshapeWindow(2 * window_size,2 * window_size);//Necessary for Mojave. Has to be different dimensions than in glutInitWindowSize();
@@ -1501,12 +1580,12 @@ void display(void)
         glClear(GL_COLOR_BUFFER_BIT );
     }
 
-    r_binary_text_file( &current_texture, "rocks_color.ppm" );                // READ IN TEXTURE AND BUMP MAP
+    r_binary_text_file( &starter_texture, "rocks_color.ppm" );                // READ IN TEXTURE AND BUMP MAP
     r_binary_text_file( &bumpmap, "rocks_bump.ppm");
     read_cube_texture_test();                                                    // READ IN THE CUBE MAP
     
 
-    init_sphere(1.0, 1.0, 0, 0, -10.0);                                          // 3D OBJECT LOADED INTO THE VERTEX/TRIANGLE LIST
+    init_sphere(1.0, 4.0, 0, 0, -10.0);                                          // 3D OBJECT LOADED INTO THE VERTEX/TRIANGLE LIST
     //init_cube( 0.0, 0.0, 0.0, 1);
     
     rotate_model_xy(xangle, yangle, zangle);                                      // IT IS ROTATED
@@ -1551,6 +1630,8 @@ void display(void)
         
         show_color_buffer();                                                // GIVES THE COLOR BUFFER TO GL TO DRAW
     }
+    stop_timer( &sw_renderer_timer );
+    printf("fps = %f\n", 1 / elapsed_time( &sw_renderer_timer ));
     numvertices = 0;                                                    // READY FOR NEXT RENDER
     numtriangles = 0;
     

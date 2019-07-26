@@ -4,25 +4,32 @@
 void draw_triangle_gl( POINT *v0, POINT *v1, POINT *v2 )
 {
     glBegin( GL_TRIANGLES );
-    glColor4fv( v0->RGBA );
-    if( texturing ) glTexCoord4fv( v0->STRQ );
-    if( phong_lighting ) glNormal3fv( v0->normal );
+    if( modulate ) glColor4fv( v0->RGBA );
+    v0->STRQ[3] = 1;
+    printf( "STRQ = [%f, %f, %f)\n",v0->STRQ[0], v0->STRQ[1], v0->STRQ[2] );
+    
+    if( texturing && !tex_gen ) glTexCoord4fv( v0->STRQ );
+    if( face_lighting || phong_lighting || tex_gen ) glNormal3fv( v0->normal );
     if( sw_vertex_processing )
         glVertex3f( v0->position[X] + 0.5, v0->position[Y] + 0.5, v0->position[Z] );
     else
         glVertex3f( v0->world[X], v0->world[Y], -v0->world[Z] );
     
-    glColor4fv( v1->RGBA );
-    if( texturing ) glTexCoord4fv( v1->STRQ );
-    if( phong_lighting ) glNormal3fv( v1->normal );
+    if( modulate ) glColor4fv( v1->RGBA );
+    v1->STRQ[3] = 1;
+    printf( "STRQ = [%f, %f, %f)\n",v1->STRQ[0], v1->STRQ[1], v1->STRQ[2] );
+    if( texturing && !tex_gen ) glTexCoord4fv( v1->STRQ );
+    if( face_lighting || phong_lighting || tex_gen ) glNormal3fv( v1->normal );
     if( sw_vertex_processing )
         glVertex3f( v1->position[X] + 0.5, v1->position[Y] + 0.5, v1->position[Z] );
     else
         glVertex3f( v1->world[X], v1->world[Y], -v1->world[Z] );
     
-    glColor4fv( v2->RGBA );
-    if( texturing ) glTexCoord4fv( v2->STRQ );
-    if( phong_lighting ) glNormal3fv( v2->normal );
+    if( modulate ) glColor4fv( v2->RGBA );
+    v2->STRQ[3] = 1;
+    printf( "STRQ = [%f, %f, %f)\n",v2->STRQ[0], v2->STRQ[1], v2->STRQ[2] );
+    if( texturing && !tex_gen ) glTexCoord4fv( v2->STRQ );
+    if( face_lighting || phong_lighting || tex_gen ) glNormal3fv( v2->normal );
     if( sw_vertex_processing )
         glVertex3f( v2->position[X] + 0.5, v2->position[Y] + 0.5, v2->position[Z] );
     else
@@ -30,6 +37,10 @@ void draw_triangle_gl( POINT *v0, POINT *v1, POINT *v2 )
     glEnd();
 }
 
+
+/*
+ * draw_line_gl()
+ */
 /*
  * draw_line_gl()
  */
@@ -39,9 +50,9 @@ void draw_line_gl( POINT *start, POINT *end )
     /*
      * start vertex
      */
-    glColor4fv( start->RGBA );
-    if( texturing ) glTexCoord4fv( start->STRQ );
-    if( phong_lighting ) glNormal3fv( start->normal );
+    if( modulate ) glColor4fv( start->RGBA );
+    if( texturing && !tex_gen ) glTexCoord4fv( start->STRQ );
+    if( face_lighting || phong_lighting || tex_gen )  glNormal3fv( start->normal );
     if( sw_vertex_processing )
         glVertex3f( start->position[X] + 0.5, start->position[Y] + 0.5, start->position[Z] );
     else
@@ -50,16 +61,15 @@ void draw_line_gl( POINT *start, POINT *end )
     /*
      * end vertex
      */
-    glColor4fv( end->RGBA );
-    if( texturing ) glTexCoord4fv( end->STRQ );
-    if( phong_lighting ) glNormal3fv( end->normal );
+    if( modulate ) glColor4fv( end->RGBA );
+    if( texturing && !tex_gen ) glTexCoord4fv( end->STRQ );
+    if( face_lighting || phong_lighting || tex_gen )  glNormal3fv( end->normal );
     if( sw_vertex_processing )
         glVertex3f( end->position[X] + 0.5, end->position[Y] + 0.5, end->position[Z] );
     else
         glVertex3f( end->world[X], end->world[Y], -end->world[Z] );
     glEnd();
 }
-
 /*
  * convert_image_to_gl
  */
@@ -97,7 +107,7 @@ void init_gl_state( void )
      */
     glClearColor(clear_color[R], clear_color[G], clear_color[B], clear_color[A] );
     glPointSize(1.0);
-    glColor4f(1.0,0.0,0.0,1.0);
+    glColor4f(0.0,1.0,1.0,1.0);
     
     /*
      * GL depth state
@@ -150,7 +160,7 @@ void init_gl_state( void )
     glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
     glTexEnvf( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_DECAL );
     
-    convert_image_to_gl( &current_texture, &gl_texture );
+    convert_image_to_gl( &starter_texture, &gl_texture );
     
     glTexImage2D( GL_TEXTURE_2D,
                  0,
