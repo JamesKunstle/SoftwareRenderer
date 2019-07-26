@@ -283,7 +283,7 @@ float light_z = 0;
 
 int phong_lighting =                OFF;
 
-int face_lighting = OFF;                    // types of lighting used on 3D models
+int face_lighting =                  OFF;                    // types of lighting used on 3D models
 
 float ambient[4] = { 0.9, 0.9, 0.9, 0.9 };  // background light added to scenes.
 
