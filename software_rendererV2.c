@@ -149,13 +149,13 @@ typedef struct timer{
 
 typedef struct timersense{           // struct that will store consecutive times recorded using the timers.
     
-    float           time1[1000];
+    float           sw_time[1000];
     
-    float           time2[1000];
+    float           gl_time[1000];
     
-    int             time1_current;      // location of next save location for swr time.
+    int             current_sw;      // location of next save location for swr time.
     
-    int             time2_current;      // location of next save location for glr time.
+    int             current_gl;      // location of next save location for glr time.
     
 }TIMERSENSE;
 
@@ -300,7 +300,7 @@ float eye[4]                = { 0, 0, 0, 1 };   // location of eye array
 
 float light[4]              = { 1, -1, -1, 1 };
 
-float light_ambient[4]      = { 1.0, 1.0, 1.0, 1.0 };
+float light_ambient[4]      = { 0.5, 0.5, 0.5, 1.0 };
 
 float light_diffuse[4]      = { 1, 1, 1, 1 };
 
