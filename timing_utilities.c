@@ -29,14 +29,14 @@ void write_timer_savefile()
     
     FILE *fp;
     
-    fp = fopen("teapot.txt", "w+");
+    fp = fopen("SWHWtimer.txt", "w+");
     
     int n = 0;
     float x, y;
     int swp = current_savefile.current_sw;
     int glp = current_savefile.current_gl;
     fprintf(fp, "F1\n");
-    fprintf(fp, "%d\n", swp);
+    fprintf(fp, "%d\n", swp < glp ? swp : glp);
     while( n <= current_savefile.current_sw )
     {
         x = current_savefile.sw_time[n++];

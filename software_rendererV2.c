@@ -395,6 +395,11 @@ int tex_gen =                    OFF;   // jamesk   placeholder for GL-supported
 GL_IMAGE current_gl_image;
 
 int num_renders = 0;
+
+int first_pass = ON;
+
+int second_pass = OFF;
+
 /*************************************************************************/
 /* utility functions                                                     */
 /*************************************************************************/
@@ -1592,39 +1597,23 @@ void r_obj_file_scenter(char *name, float cx, float cy, float cz)
     fclose(fp);
 }
 
-void write_timer_savefile()
-{ // need to be able to pass in an array of chars that contain the name.
-    
-    FILE *fp;
-    
-    fp = fopen("teapot.txt", "w+");
-    
-    int n = 0;
-    
-    float x, y;
-    
-    int swp = current_savefile.current_sw;
-    
-    int glp = current_savefile.current_gl;
-    
-    fprintf(fp, "F1\n");
-    fprintf(fp, "%d\n", swp);
-    
-    while( n <= current_savefile.current_sw )
+void record_time()
+{
+    printf("time recorded\n");
+    if( first_pass )
     {
-        x = current_savefile.sw_time[n++];
-        fprintf(fp, "%f\n", x);
+        float elapsed_sw = elapsed_time( &sw_renderer_timer );
+        current_savefile.sw_time[current_savefile.current_sw++] = elapsed_sw;
     }
-    
-    int m = 0;
-    while( m <= current_savefile.current_gl )
+    else if ( second_pass )
     {
-        x = current_savefile.gl_time[m++];
-        fprintf(fp, "%f\n", x);
+        float elapsed_gl = elapsed_time( &gl_timer );
+        current_savefile.gl_time[current_savefile.current_gl++] = elapsed_gl;
     }
-    
-    fclose(fp);
-    printf("Timer savefile written!\n");
+    else
+    {
+        printf("ehhhhhhhhhhhhhhhhhhhhhhhhhhhhh\n");
+    }
 }
 
 
@@ -1636,7 +1625,16 @@ void write_timer_savefile()
  */
 void display(void)
 {
-    start_timer( &sw_renderer_timer );
+
+    if( first_pass )
+    {
+        start_timer( &sw_renderer_timer );
+    }
+    if( second_pass )
+    {
+         start_timer( &gl_timer );
+    }
+    
     if( Mojave_WorkAround )
     {
         glutReshapeWindow(2 * window_size,2 * window_size);//Necessary for Mojave. Has to be different dimensions than in glutInitWindowSize();
@@ -1649,7 +1647,7 @@ void display(void)
     clear_c_buff(0, 0, 0, 1);                                                // clear the color and depth buffers
     clear_d_buff(1000000);
     
-    print_stats();
+    //print_stats();
     
     if( deferred_rendering )
     {
@@ -1738,11 +1736,25 @@ void display(void)
         
         show_color_buffer();                                                // GIVES THE COLOR BUFFER TO GL TO DRAW
     }
-    stop_timer( &sw_renderer_timer );
+    if( first_pass )
+    {
+        stop_timer( &sw_renderer_timer );
+    }
+    if( second_pass )
+    {
+        stop_timer( &gl_timer );
+    }
+    
+    if(num_renders == 210)
+    {
+        first_pass = OFF;
+        second_pass = ON;
+    }
+    
     printf("fps = %.2f\n", 1 / elapsed_time( &sw_renderer_timer ));
     numvertices = 0;                                                    // READY FOR NEXT RENDER
     numtriangles = 0;
-    
+    record_time();
     /*
      * show results
      */
@@ -1752,6 +1764,20 @@ void display(void)
     glClear(GL_COLOR_BUFFER_BIT );
     printf("Scenes rendered: %d\n", num_renders);
     num_renders++;
+    if(num_renders == 210)
+    {
+        first_pass = OFF;
+        second_pass = ON;
+        use_hardware_opengl = ON;
+    }
+    if(num_renders == 410)
+    {
+        first_pass = OFF;
+        second_pass = OFF;
+        write_timer_savefile();
+    }
+    
+    
 }
 
 /*
@@ -1802,6 +1828,9 @@ static void Key(unsigned char key, int x, int y)
         case 'G':       sw_vertex_processing = ( 1 - sw_vertex_processing );    break;
         case '/':       render_counter_reset();                          break;
         case 'E':       tex_gen = 1 - tex_gen;                              break;
+        case '<':       write_timer_savefile(); printf( "Sw: %d  Hw: %d \n", current_savefile.current_sw, current_savefile.current_gl);   break;
+        case',':        first_pass = ON;    second_pass = OFF;      break;
+        case'.':        second_pass = ON;      first_pass = OFF;    break;
     }
     draw_one_frame = 1;
     glutPostRedisplay();
