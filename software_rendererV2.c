@@ -1466,6 +1466,8 @@ void print_stats()
     printf("Software-vertex-processing:      (G)       %d\n", sw_vertex_processing);
     printf("_______________                  ___       ___\n");
     printf("Cube-mapping                     (C)       %d\n", cube_mapping);
+    printf("_______________                  ___       ___\n");
+    printf("Tex-gen                          (E)       %d\n", tex_gen);
     printf("==============================================^^^^^^^^^^^^^^\n");
 }
 
@@ -1763,6 +1765,7 @@ static void Key(unsigned char key, int x, int y)
         case 'H':       use_hardware_opengl = ( 1 - use_hardware_opengl );      break;
         case 'G':       sw_vertex_processing = ( 1 - sw_vertex_processing );    break;
         case '/':       render_counter_reset();                          break;
+        case 'E':       tex_gen = 1 - tex_gen;                              break;
     }
     draw_one_frame = 1;
     glutPostRedisplay();
