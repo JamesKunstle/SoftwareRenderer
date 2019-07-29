@@ -1545,12 +1545,14 @@ void render_counter_reset()
 
 void r_obj_file_scenter(char *name, float cx, float cy, float cz)
 {
+    printf("L1\n\n\n");
     numvertices = 0; // reading in a new object
     numtriangles = 0;
     FILE *fp;
     fp = fopen(name, "r");
     float x, y, z;
     int i, j, k;
+    printf("L1");
     
     while(fscanf(fp, "v %f %f %f\n", &x, &y, &z) == 3)
     {//read in the vertices from the file. Put them in the vertex list.
@@ -1569,6 +1571,7 @@ void r_obj_file_scenter(char *name, float cx, float cy, float cz)
         
         
     }
+    printf("L2\n\n\n");
     int count = 0;
     while(fscanf(fp, "f %d %d %d\n", &i, &j, &k) == 3)
     {//read the indices of vertices into the triangle list. vertices are 1-ordered so must subtract 1.
