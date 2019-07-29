@@ -1574,10 +1574,10 @@ void display(void)
     
     
     
-    init_gl_state();                                                          // set up the state of GL
-    
     if( use_hardware_opengl )                                                // if we're passing GL vertices for triangles
     {
+        init_gl_state();                                                          // set up the state of GL
+        
         change_gl_state();
     }
     else
@@ -1596,14 +1596,16 @@ void display(void)
     {
         r_binary_text_file( &bumpmap, "rocks_bump.ppm");
     }
+    
     if(cube_mapping)
     {
      read_cube_texture_test();                                                    // READ IN THE CUBE MAP
     }
     
 
-    init_sphere(1.0, 2.0, 0, 0, -10.0);                                          // 3D OBJECT LOADED INTO THE VERTEX/TRIANGLE LIST
+    //init_sphere(1.0, 2.0, 0, 0, -10.0);                                          // 3D OBJECT LOADED INTO THE VERTEX/TRIANGLE LIST
     //init_cube( 0.0, 0.0, 0.0, 1);
+    r_obj_file_scenter("teapot.obj", 0.0, 0.0, -10.0);
     
     rotate_model_xy(xangle, yangle, zangle);                                      // IT IS ROTATED
     t_model(translation_value - 30);                                              // IT IS TRANSLATED
