@@ -1534,10 +1534,50 @@ void gl_printf( int x, int y, char *s )
     
 }
 
-void stats()
+void r_obj_file_scenter(char *name, float cx, float cy, float cz)
 {
+    numvertices = 0; // reading in a new object
+    numtriangles = 0;
+    FILE *fp;
+    fp = fopen(name, "r");
+    float x, y, z;
+    int i, j, k;
     
+    while(fscanf(fp, "v %f %f %f\n", &x, &y, &z) == 3)
+    {//read in the vertices from the file. Put them in the vertex list.
+        vertex_list[numvertices].normal[0] = 0;
+        vertex_list[numvertices].normal[1] = 0;
+        vertex_list[numvertices].normal[2] = 0;
+        vertex_list[numvertices].normal[3] = 0;
+        vertex_list[numvertices].RGBA[R] = 1.0;
+        vertex_list[numvertices].RGBA[G] = 1.0;
+        vertex_list[numvertices].RGBA[B] = 1.0;
+        
+        vertex_list[numvertices].world[X] = x + cx;
+        vertex_list[numvertices].world[Y] = y + cy;
+        vertex_list[numvertices].num_tri = 0;
+        vertex_list[numvertices++].world[Z] = z + cy;
+        
+        
+    }
+    int count = 0;
+    while(fscanf(fp, "f %d %d %d\n", &i, &j, &k) == 3)
+    {//read the indices of vertices into the triangle list. vertices are 1-ordered so must subtract 1.
+        triangle_list[numtriangles].normal[0] = 0;
+        triangle_list[numtriangles].normal[1] = 0;
+        triangle_list[numtriangles].normal[2] = 0;
+        triangle_list[numtriangles].normal[3] = 0;
+        triangle_list[numtriangles].vertex[0] = i - 1;
+        triangle_list[numtriangles].vertex[1] = j - 1;
+        triangle_list[numtriangles++].vertex[2] = k - 1;
+        vertex_list[i - 1].tri_list[vertex_list[i - 1].num_tri] = count; // the vertex adding for i knows which triangle it's a part of.
+        vertex_list[j - 1].tri_list[vertex_list[j - 1].num_tri] = count;
+        vertex_list[k - 1].tri_list[vertex_list[k - 1].num_tri++] = count;
+        count++;
+    }
+    fclose(fp);
 }
+
 
 /*************************************************************************/
 /* GLUT functions                                                        */
