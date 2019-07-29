@@ -1638,8 +1638,10 @@ void display(void)
     
     if( texturing )
     {
-        
+        printf("Reading texture\n");
         r_binary_text_file( &starter_texture, "rocks_color.ppm" );                // READ IN TEXTURE AND BUMP MAP
+        copy_texture( &starter_texture );
+        perspective_correct = OFF;                                              // jamesk this is a hack so that the texturing always works for this model
     }
     
     if( bumpmapping)
@@ -1653,9 +1655,9 @@ void display(void)
     }
     
     
-    //init_sphere(1.0, 2.0, 0, 0, -10.0);                                          // 3D OBJECT LOADED INTO THE VERTEX/TRIANGLE LIST
+    init_sphere(1.0, 2.0, 0, 0, -10.0);                                          // 3D OBJECT LOADED INTO THE VERTEX/TRIANGLE LIST
     //init_cube( 0.0, 0.0, 0.0, 1);
-    r_obj_file_scenter("teapot.obj", 0.0, 0.0, -10.0);
+    //r_obj_file_scenter("teapot.obj", 0.0, 0.0, -10.0);
     
     rotate_model_xy(xangle, yangle, zangle);                                      // IT IS ROTATED
     t_model(translation_value - 30);                                              // IT IS TRANSLATED
