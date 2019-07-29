@@ -6,7 +6,6 @@ void draw_triangle_gl( POINT *v0, POINT *v1, POINT *v2 )
     glBegin( GL_TRIANGLES );
     if( modulate ) glColor4fv( v0->RGBA );
     v0->STRQ[3] = 1;
-    printf( "STRQ = [%f, %f, %f)\n",v0->STRQ[0], v0->STRQ[1], v0->STRQ[2] );
     
     if( texturing && !tex_gen ) glTexCoord4fv( v0->STRQ );
     if( face_lighting || phong_lighting || tex_gen ) glNormal3fv( v0->normal );
@@ -17,7 +16,6 @@ void draw_triangle_gl( POINT *v0, POINT *v1, POINT *v2 )
     
     if( modulate ) glColor4fv( v1->RGBA );
     v1->STRQ[3] = 1;
-    printf( "STRQ = [%f, %f, %f)\n",v1->STRQ[0], v1->STRQ[1], v1->STRQ[2] );
     if( texturing && !tex_gen ) glTexCoord4fv( v1->STRQ );
     if( face_lighting || phong_lighting || tex_gen ) glNormal3fv( v1->normal );
     if( sw_vertex_processing )
@@ -27,7 +25,6 @@ void draw_triangle_gl( POINT *v0, POINT *v1, POINT *v2 )
     
     if( modulate ) glColor4fv( v2->RGBA );
     v2->STRQ[3] = 1;
-    printf( "STRQ = [%f, %f, %f)\n",v2->STRQ[0], v2->STRQ[1], v2->STRQ[2] );
     if( texturing && !tex_gen ) glTexCoord4fv( v2->STRQ );
     if( face_lighting || phong_lighting || tex_gen ) glNormal3fv( v2->normal );
     if( sw_vertex_processing )
@@ -191,7 +188,7 @@ void init_gl_state( void )
     
     for( int i = 0; i < 6; i++ )
     {
-        convert_image_to_gl( &cubemap[i], &gl_texture );
+        convert_image_to_gl( &cubemap[i], &gl_texture ); // jamesk converting the whole cubemap to the correct GL texture.
         
         glTexImage2D( GL_TEXTURE_CUBE_MAP_POSITIVE_X + i,
                      0,

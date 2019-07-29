@@ -149,9 +149,9 @@ typedef struct timer{
 
 typedef struct timersense{           // struct that will store consecutive times recorded using the timers.
     
-    float           sw_time[1000];   // stored rendering times of the software renderer.
+    float           sw_time[1000];
     
-    float           gl_time[1000];   // stored rendering times of GL
+    float           gl_time[1000];
     
     int             current_sw;      // location of next save location for swr time.
     
@@ -300,7 +300,7 @@ float eye[4]                = { 0, 0, 0, 1 };   // location of eye array
 
 float light[4]              = { 1, -1, -1, 1 };
 
-float light_ambient[4]      = { 1.0, 1.0, 1.0, 1.0 };
+float light_ambient[4]      = { 0.5, 0.5, 0.5, 1.0 };
 
 float light_diffuse[4]      = { 1, 1, 1, 1 };
 
@@ -393,6 +393,8 @@ int alpha_blending =             OFF;   // jamesk   placeholder global variable 
 int tex_gen =                    OFF;   // jamesk   placeholder for GL-supported texture coordinate generation
 
 GL_IMAGE current_gl_image;
+
+int num_renders = 0;
 /*************************************************************************/
 /* utility functions                                                     */
 /*************************************************************************/
@@ -1048,10 +1050,10 @@ void rotate_model_xy(float x_angle, float y_angle, float z_angle) //rotates the 
     {
         // for every point in the vertices, change the spatial x, y, z dimensions using the input angles and the point world properties
         xprime = vertex_list[i].world[X] * cos(z_angle / 360.0 * 2.0 * 3.1415926)
-                    - vertex_list[i].world[Y] * sin(z_angle / 360.0 * 2.0 * 3.1415926);
+        - vertex_list[i].world[Y] * sin(z_angle / 360.0 * 2.0 * 3.1415926);
         
         yprime = vertex_list[i].world[X] * sin(z_angle / 360.0 * 2.0 * 3.1415926)
-                    + vertex_list[i].world[Y] * cos(z_angle / 360.0 * 2.0 * 3.1415926);
+        + vertex_list[i].world[Y] * cos(z_angle / 360.0 * 2.0 * 3.1415926);
         
         
         vertex_list[i].world[X] = xprime;
@@ -1061,10 +1063,10 @@ void rotate_model_xy(float x_angle, float y_angle, float z_angle) //rotates the 
     {
         // for every point in the vertices, change the spatial x, y, z dimensions using the input angles and the point world properties
         xprime = vertex_list[i].world[X] * cos(y_angle / 360.0 * 2.0 * 3.1415926)
-                    - vertex_list[i].world[Z] * sin(y_angle / 360.0 * 2.0 * 3.1415926);
+        - vertex_list[i].world[Z] * sin(y_angle / 360.0 * 2.0 * 3.1415926);
         
         zprime = vertex_list[i].world[X] * sin(y_angle / 360.0 * 2.0 * 3.1415926)
-                    + vertex_list[i].world[Z] * cos(y_angle / 360.0 * 2.0 * 3.1415926);
+        + vertex_list[i].world[Z] * cos(y_angle / 360.0 * 2.0 * 3.1415926);
         
         
         vertex_list[i].world[X] = xprime;
@@ -1074,10 +1076,10 @@ void rotate_model_xy(float x_angle, float y_angle, float z_angle) //rotates the 
     {
         // for every point in the vertices, change the spatial x, y, z dimensions using the input angles and the point world properties
         yprime = vertex_list[i].world[Y] * cos(x_angle / 360.0 * 2.0 * 3.1415926)
-                    - vertex_list[i].world[Z] * sin(x_angle / 360.0 * 2.0 * 3.1415926);
+        - vertex_list[i].world[Z] * sin(x_angle / 360.0 * 2.0 * 3.1415926);
         
         zprime = vertex_list[i].world[Y] * sin(x_angle / 360.0 * 2.0 * 3.1415926)
-                    + vertex_list[i].world[Z] * cos(x_angle / 360.0 * 2.0 * 3.1415926);
+        + vertex_list[i].world[Z] * cos(x_angle / 360.0 * 2.0 * 3.1415926);
         
         
         vertex_list[i].world[Y] = yprime;
@@ -1322,7 +1324,7 @@ void init_cube( float cx, float cy, float cz, float s )
     set_vect_4( color,  1,  0,  0,  0 );
     set_vect_4( tex,    0,  0,  0,  1 );
     add_vertex( world, pos, color, tex, normal, 0, NULL, 0 );
-
+    
     set_vect_4( world, -s+cx,  s+cy,  s+cz,  1 );
     set_vect_4( color,  0,  1,  0,  0 );
     set_vect_4( tex,    1,  0,  0,  1 );
@@ -1462,6 +1464,8 @@ void print_stats()
     printf("Use-hardware enabled:            (H)       %d\n", use_hardware_opengl);
     printf("_______________                  ___       ___\n");
     printf("Software-vertex-processing:      (G)       %d\n", sw_vertex_processing);
+    printf("_______________                  ___       ___\n");
+    printf("Cube-mapping                     (C)       %d\n", cube_mapping);
     printf("==============================================^^^^^^^^^^^^^^\n");
 }
 
@@ -1534,48 +1538,9 @@ void gl_printf( int x, int y, char *s )
     
 }
 
-void r_obj_file_scenter(char *name, float cx, float cy, float cz)
+void render_counter_reset()
 {
-    numvertices = 0; // reading in a new object
-    numtriangles = 0;
-    FILE *fp;
-    fp = fopen(name, "r");
-    float x, y, z;
-    int i, j, k;
-    
-    while(fscanf(fp, "v %f %f %f\n", &x, &y, &z) == 3)
-    {//read in the vertices from the file. Put them in the vertex list.
-        vertex_list[numvertices].normal[0] = 0;
-        vertex_list[numvertices].normal[1] = 0;
-        vertex_list[numvertices].normal[2] = 0;
-        vertex_list[numvertices].normal[3] = 0;
-        vertex_list[numvertices].RGBA[R] = 1.0;
-        vertex_list[numvertices].RGBA[G] = 1.0;
-        vertex_list[numvertices].RGBA[B] = 1.0;
-        
-        vertex_list[numvertices].world[X] = x + cx;
-        vertex_list[numvertices].world[Y] = y + cy;
-        vertex_list[numvertices].num_tri = 0;
-        vertex_list[numvertices++].world[Z] = z + cy;
-        
-        
-    }
-    int count = 0;
-    while(fscanf(fp, "f %d %d %d\n", &i, &j, &k) == 3)
-    {//read the indices of vertices into the triangle list. vertices are 1-ordered so must subtract 1.
-        triangle_list[numtriangles].normal[0] = 0;
-        triangle_list[numtriangles].normal[1] = 0;
-        triangle_list[numtriangles].normal[2] = 0;
-        triangle_list[numtriangles].normal[3] = 0;
-        triangle_list[numtriangles].vertex[0] = i - 1;
-        triangle_list[numtriangles].vertex[1] = j - 1;
-        triangle_list[numtriangles++].vertex[2] = k - 1;
-        vertex_list[i - 1].tri_list[vertex_list[i - 1].num_tri] = count; // the vertex adding for i knows which triangle it's a part of.
-        vertex_list[j - 1].tri_list[vertex_list[j - 1].num_tri] = count;
-        vertex_list[k - 1].tri_list[vertex_list[k - 1].num_tri++] = count;
-        count++;
-    }
-    fclose(fp);
+    num_renders = 1;
 }
 
 
@@ -1601,6 +1566,7 @@ void display(void)
     clear_d_buff(1000000);
     
     print_stats();
+    
     if( deferred_rendering )
     {
         clear_g_buffer( 0.0, 0.0, 0.0, 1.0 );
@@ -1608,10 +1574,10 @@ void display(void)
     
     
     
-    init_gl_state();                                                          // set up the state of GL
-    
     if( use_hardware_opengl )                                                // if we're passing GL vertices for triangles
     {
+        init_gl_state();                                                          // set up the state of GL
+        
         change_gl_state();
     }
     else
@@ -1619,32 +1585,48 @@ void display(void)
         default_gl_state();                                                   // if we're delivering pixels to GL
         glClear(GL_COLOR_BUFFER_BIT );
     }
-
-    r_binary_text_file( &starter_texture, "rocks_color.ppm" );                // READ IN TEXTURE AND BUMP MAP
-    r_binary_text_file( &bumpmap, "rocks_bump.ppm");
-    read_cube_texture_test();                                                    // READ IN THE CUBE MAP
     
-
-    init_sphere(1.0, 4.0, 0, 0, -10.0);                                          // 3D OBJECT LOADED INTO THE VERTEX/TRIANGLE LIST
+    if( texturing )
+    {
+        
+        r_binary_text_file( &starter_texture, "rocks_color.ppm" );                // READ IN TEXTURE AND BUMP MAP
+    }
+    
+    if( bumpmapping)
+    {
+        r_binary_text_file( &bumpmap, "rocks_bump.ppm");
+    }
+    
+    if(cube_mapping)
+    {
+        read_cube_texture_test();                                                    // READ IN THE CUBE MAP
+    }
+    
+    
+    //init_sphere(1.0, 2.0, 0, 0, -10.0);                                          // 3D OBJECT LOADED INTO THE VERTEX/TRIANGLE LIST
     //init_cube( 0.0, 0.0, 0.0, 1);
+    r_obj_file_scenter("teapot.obj", 0.0, 0.0, -10.0);
     
     rotate_model_xy(xangle, yangle, zangle);                                      // IT IS ROTATED
-    t_model(translation_value - 30);                                             // IT IS TRANSLATED
-//    rotate_model_matrix(xangle, yangle, zangle);
-//    t_model_matrix(translation_value - 30);                                    // matrix versions of^
+    t_model(translation_value - 30);                                              // IT IS TRANSLATED
+    //    rotate_model_matrix(xangle, yangle, zangle);
+    //    t_model_matrix(translation_value - 30);                                     // matrix versions of^
     
     //rotate_translate_matrix( xangle, yangle, zangle, translation_value - 30 );
     
-//    MATRIX_4 camera_matrix;
-//    set_camera_matrix( camera_matrix, eye, lookat, global_camera.up );
+    //    MATRIX_4 camera_matrix;
+    //    set_camera_matrix( camera_matrix, eye, lookat, global_camera.up );
     
     cal_face_normal();
-    calculate_vertex_normals();                                                  // NORMALS RECALCULATED
+    calculate_vertex_normals();                                                   // NORMALS RECALCULATED
     
     // FROM HERE ON, BEGINNING TO WORK WITH SCREEN COORDINATES
     
-    setup_clip_frustum();
-    calculate_clip_distances();                                                 // CALCULATES WHICH TRIANGLES ARE WITHIN BOUNDS
+    if( !use_hardware_opengl )
+    {
+        setup_clip_frustum();
+        calculate_clip_distances();                                                // CALCULATES WHICH TRIANGLES ARE WITHIN BOUNDS
+    }
     
     
     if(perspective_draw == ON)                                                  // FORM MODEL PERSPECTIVE / P_CORRECT
@@ -1657,7 +1639,7 @@ void display(void)
     }
     
     scale_p_model(100.0);                                               // scales model in position vectors after formation.
-
+    
     draw_model();                                                       // LOADS COLOR BUFFER, USES DRAW TRIANGLE ETC
     
     
@@ -1671,7 +1653,7 @@ void display(void)
         show_color_buffer();                                                // GIVES THE COLOR BUFFER TO GL TO DRAW
     }
     stop_timer( &sw_renderer_timer );
-    printf("fps = %f\n", 1 / elapsed_time( &sw_renderer_timer ));
+    printf("fps = %.2f\n", 1 / elapsed_time( &sw_renderer_timer ));
     numvertices = 0;                                                    // READY FOR NEXT RENDER
     numtriangles = 0;
     
@@ -1682,6 +1664,8 @@ void display(void)
     glutPostRedisplay();//Necessary for Mojave.
     draw_one_frame = 0;
     glClear(GL_COLOR_BUFFER_BIT );
+    printf("Scenes rendered: %d\n", num_renders);
+    num_renders++;
 }
 
 /*
@@ -1713,16 +1697,16 @@ static void Key(unsigned char key, int x, int y)
         case 'l':       perspective_correct = (1-perspective_correct);   break;
             
         case 'r':       rasterize = (1 - rasterize);                     break;
-        
+            
         case '!':       naive_mapping = ON; cylindrical_mapping = OFF; spherical_mapping = OFF; cube_mapping = OFF; break;
         case '@':       naive_mapping = OFF; cylindrical_mapping = ON; spherical_mapping = OFF; cube_mapping = OFF; break;
         case '#':       naive_mapping = OFF; cylindrical_mapping = OFF; spherical_mapping = ON; cube_mapping = OFF;break;
             
-        case 'P':       phong_lighting = ON; face_lighting = OFF;        break;
-        case 'F':       face_lighting = ON; phong_lighting = OFF;        break;
+        case 'P':       phong_lighting = (1 - phong_lighting); face_lighting = OFF;        break;
+        case 'F':       face_lighting = (1 - face_lighting); phong_lighting = OFF;        break;
         case 'D':       depth_of_field = ( 1 - depth_of_field);          break;
         case 'R':       reflection = 1 - reflection;                     break;
-        case 'C':       cube_mapping = ON; naive_mapping = OFF; cylindrical_mapping = OFF; spherical_mapping = OFF; break;
+        case 'C':       cube_mapping = ( 1 - cube_mapping); naive_mapping = OFF; cylindrical_mapping = OFF; spherical_mapping = OFF; break;
             
         case '0':       wave+=0.1;                                       break;
         case '9':       wave-=0.1;                                       break;
@@ -1730,6 +1714,7 @@ static void Key(unsigned char key, int x, int y)
         case 'Q':       deferred_rendering = ( 1 - deferred_rendering ); break;
         case 'H':       use_hardware_opengl = ( 1 - use_hardware_opengl );      break;
         case 'G':       sw_vertex_processing = ( 1 - sw_vertex_processing );    break;
+        case '/':       render_counter_reset();                          break;
     }
     draw_one_frame = 1;
     glutPostRedisplay();
