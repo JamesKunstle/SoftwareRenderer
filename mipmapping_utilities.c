@@ -23,6 +23,11 @@ MIPMAP mm;
 
 /* ========================================================================== */
 
+/* ============================   PROTOTYPES     ============================ */
+void triage_mipmap_fill( MIPMAP *cmm);
+void mipmap_fill( float in[][][], float out[][][], int height, int width);
+/* ========================================================================== */
+
 void mipmap()                                      // reads in the data from the current_texture array.
 {
     int height = current_texture.height;
@@ -56,35 +61,105 @@ void mipmap()                                      // reads in the data from the
         printf("Texture size invalid.\n");
     }
     
-    triage_mipmap_fill( &mm) ;               // pass the determined LOD and a reference to the current mipmap
+    triage_mipmap_fill();               // pass the determined LOD and a reference to the current mipmap
 }
 
-void triage_mipmap_fill( int *cmm)                      // sends the correct textures to be minimized to their correct places.
+void triage_mipmap_fill()                      // sends the correct textures to be minimized to their correct places.
 {
-    switch ( cmm->max_mipmap_ind )
+    int xstep;                  // integer division to determin how many steps it takes to downsample in to out for a 2x2 box filter.
+    int ystep;
+    int height;
+    int width;
+    int stepdown = 0;           // indicates whether we're reading from the current_texture (in which case we're intializing the first of the mipmap textures) or whether we're stepping down to the next smaller texture from a larger one above that was already initialized.
+    switch ( cmm.max_mipmap_ind )
     {
         case 0:
-            mipmap_fill() /* jamesk unfinished.*/
+            height = 1024;
+            width = 1024;
+            xstep = width / 2;                  // integer division to determin how many steps it takes to downsample in to out for a 2x2 box filter.
+            ystep = height / 2;
+            
+            for ( int j = 0; j < height; j += 2 )   // step of the box-filter. jamesk: needs to be able to accomodate 1x1 and 2x2. Probably with conditions in the below assignment.
+            {
+                for ( int i = 0; i < width; i += 2 )
+                {
+                    mm.zero[j][i][R] = (current_texture[j][i][R] + current_texture[j + 1][i][R] + current_texture[j][i + 1][R] + current_texture[j + 1][i + 1][R]) / 4.0;
+                    mm.zero[j][i][G] = (current_texture[j][i][G] + current_texture[j + 1][i][G] + current_texture[j][i + 1][G] + current_texture[j + 1][i + 1][G]) / 4.0;
+                    mm.zero[j][i][B] = (current_texture[j][i][B] + current_texture[j + 1][i][B] + current_texture[j][i + 1][B] + current_texture[j + 1][i + 1][B]) / 4.0;
+                    mm.zero[j][i][A] = (current_texture[j][i][A] + current_texture[j + 1][i][A] + current_texture[j][i + 1][A] + current_texture[j + 1][i + 1][A]) / 4.0;
+                }
+            }
             continue;
-        case 2: // code to be executed if n = 2;
-            break;
-        default: // code to be executed if n doesn't match any cases
+        case 1:
+            height = 512;
+            width = 512;
+            xstep = width / 2;                  // integer division to determin how many steps it takes to downsample in to out for a 2x2 box filter.
+            ystep = height / 2;
+            if( !stepdown )
+            {
+                for ( int j = 0; j < height; j += 2 )   // step of the box-filter. jamesk: needs to be able to accomodate 1x1 and 2x2. Probably with conditions in the below assignment.
+                {
+                    for ( int i = 0; i < width; i += 2 )
+                    {
+                        mm.one[j][i][R] = (current_texture[j][i][R] + current_texture[j + 1][i][R] + current_texture[j][i + 1][R] + current_texture[j + 1][i + 1][R]) / 4.0;
+                        mm.one[j][i][G] = (current_texture[j][i][G] + current_texture[j + 1][i][G] + current_texture[j][i + 1][G] + current_texture[j + 1][i + 1][G]) / 4.0;
+                        mm.one[j][i][B] = (current_texture[j][i][B] + current_texture[j + 1][i][B] + current_texture[j][i + 1][B] + current_texture[j + 1][i + 1][B]) / 4.0;
+                        mm.one[j][i][A] = (current_texture[j][i][A] + current_texture[j + 1][i][A] + current_texture[j][i + 1][A] + current_texture[j + 1][i + 1][A]) / 4.0;
+                    }
+                }
+            }
+            else
+            {
+                for ( int j = 0; j < height; j += 2 )   // step of the box-filter. jamesk: needs to be able to accomodate 1x1 and 2x2. Probably with conditions in the below assignment.
+                {
+                    for ( int i = 0; i < width; i += 2 )
+                    {
+                        mm.one[j][i][R] = (zero[j][i][R] + zero[j + 1][i][R] + zero[j][i + 1][R] + zero[j + 1][i + 1][R]) / 4.0;
+                        mm.one[j][i][G] = (zero[j][i][G] + zero[j + 1][i][G] + zero[j][i + 1][G] + zero[j + 1][i + 1][G]) / 4.0;
+                        mm.one[j][i][B] = (zero[j][i][B] + zero[j + 1][i][B] + zero[j][i + 1][B] + zero[j + 1][i + 1][B]) / 4.0;
+                        mm.one[j][i][A] = (zero[j][i][A] + zero[j + 1][i][A] + zero[j][i + 1][A] + zero[j + 1][i + 1][A]) / 4.0;
+                    }
+                }
+            }
+            continue;
+        case 2:
+            height = 256;
+            width = 256;
+            xstep = width / 2;                  // integer division to determin how many steps it takes to downsample in to out for a 2x2 box filter.
+            ystep = height / 2;
+            if( !stepdown )
+            {
+                for ( int j = 0; j < height; j += 2 )   // step of the box-filter. jamesk: needs to be able to accomodate 1x1 and 2x2. Probably with conditions in the below assignment.
+                {
+                    for ( int i = 0; i < width; i += 2 )
+                    {
+                        mm.two[j][i][R] = (current_texture[j][i][R] + current_texture[j + 1][i][R] + current_texture[j][i + 1][R] + current_texture[j + 1][i + 1][R]) / 4.0;
+                        mm.two[j][i][G] = (current_texture[j][i][G] + current_texture[j + 1][i][G] + current_texture[j][i + 1][G] + current_texture[j + 1][i + 1][G]) / 4.0;
+                        mm.two[j][i][B] = (current_texture[j][i][B] + current_texture[j + 1][i][B] + current_texture[j][i + 1][B] + current_texture[j + 1][i + 1][B]) / 4.0;
+                        mm.two[j][i][A] = (current_texture[j][i][A] + current_texture[j + 1][i][A] + current_texture[j][i + 1][A] + current_texture[j + 1][i + 1][A]) / 4.0;
+                    }
+                }
+            }
+            else
+            {
+                for ( int j = 0; j < height; j += 2 )   // step of the box-filter. jamesk: needs to be able to accomodate 1x1 and 2x2. Probably with conditions in the below assignment.
+                {
+                    for ( int i = 0; i < width; i += 2 )
+                    {
+                        mm.two[j][i][R] = (one[j][i][R] + one[j + 1][i][R] + one[j][i + 1][R] + one[j + 1][i + 1][R]) / 4.0;
+                        mm.two[j][i][G] = (one[j][i][G] + one[j + 1][i][G] + one[j][i + 1][G] + one[j + 1][i + 1][G]) / 4.0;
+                        mm.two[j][i][B] = (one[j][i][B] + one[j + 1][i][B] + one[j][i + 1][B] + one[j + 1][i + 1][B]) / 4.0;
+                        mm.one[j][i][A] = (one[j][i][A] + one[j + 1][i][A] + one[j][i + 1][A] + one[j + 1][i + 1][A]) / 4.0;
+                    }
+                }
+            }
+            continue;
+        default:
+            printf("Unable to triage.\n");
     }
 }
 
-void mipmap_fill( float *in, float *out, int height, int width
+void mipmap_fill( float in[][][], float out[][][], int height, int width)
 {
-    int xstep = width / 2;                  // integer division to determin how many steps it takes to downsample in to out for a 2x2 box filter.
-    int ystep = height / 2;
-    
-    for ( int j = 0; j < height; j += 2 )   // step of the box-filter. jamesk: needs to be able to accomodate 1x1 and 2x2. Probably with conditions in the below assignment.
-    {
-        for ( int i = 0; i < width; i += 2 )
-        {
-            out[j][i][R] = (in[j][i][R] + in[j + 1][i][R] + in[j][i + 1][R] + in[j + 1 ][i + 1][R]) / 4.0;  // the average color channels are read to the output
-            out[j][i][G] = (in[j][i][G] + in[j + 1][i][G] + in[j][i + 1][G] + in[j + 1 ][i + 1][G]) / 4.0;
-            out[j][i][B] = (in[j][i][B] + in[j + 1][i][B] + in[j][i + 1][B] + in[j + 1 ][i + 1][B]) / 4.0;
-            out[j][i][A] = (in[j][i][A] + in[j + 1][i][A] + in[j][i + 1][A] + in[j + 1 ][i + 1][A]) / 4.0;
-        }
-    }
+
 }
