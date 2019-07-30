@@ -23,13 +23,13 @@ MIPMAP mm;
 
 /* ========================================================================== */
 
-void generate_mipmap()      // reads in the data from the current_texture array. This must be initialized first.
+void mipmap()                                      // reads in the data from the current_texture array.
 {
     int height = current_texture.height;
     int width = current_texture.width;
-    int threshold = (height) < (width)) ? (height) : (width)); // determines the max_mipmap
+    int threshold = height < width ? height : width;        // determines the max_mipmap
     
-    if      ( threshold > 1024 )   mm.max_mipmap_ind = 0;
+    if      ( threshold > 1024 )   mm.max_mipmap_ind = 0;   // taking lower-bound size of mm. 506x506 /=> 512x512.
 
     else if ( threshold > 512 )    mm.max_mipmap_ind = 1;
 
@@ -56,5 +56,24 @@ void generate_mipmap()      // reads in the data from the current_texture array.
         printf("Texture size invalid.\n");
     }
     
-    
+    triage_mipmap_fill( &mm) ;               // pass the determined LOD and a reference to the current mipmap
+}
+
+void triage_mipmap_fill( int *cmm)                      // sends the correct textures to be minimized to their correct places.
+{
+    switch ( cmm->max_mipmap_ind )
+    {
+        case 0:
+            mipmap_fill() /* jamesk unfinished.*/
+            continue;
+        case 2: // code to be executed if n = 2;
+            break;
+        default: // code to be executed if n doesn't match any cases
+    }
+}
+
+void mipmap_fill( float *in, float *out, int height, int width
+{
+    int xstep = width / 2;      // integer division to determin how many steps it takes to downsample in to out for a 2x2 box filter.
+    int ystep = height / 2;     
 }
