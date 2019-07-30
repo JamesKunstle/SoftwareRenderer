@@ -74,6 +74,17 @@ void triage_mipmap_fill( int *cmm)                      // sends the correct tex
 
 void mipmap_fill( float *in, float *out, int height, int width
 {
-    int xstep = width / 2;      // integer division to determin how many steps it takes to downsample in to out for a 2x2 box filter.
-    int ystep = height / 2;     
+    int xstep = width / 2;                  // integer division to determin how many steps it takes to downsample in to out for a 2x2 box filter.
+    int ystep = height / 2;
+    
+    for ( int j = 0; j < height; j += 2 )   // step of the box-filter. jamesk: needs to be able to accomodate 1x1 and 2x2. Probably with conditions in the below assignment.
+    {
+        for ( int i = 0; i < width; i += 2 )
+        {
+            out[j][i][R] = (in[j][i][R] + in[j + 1][i][R] + in[j][i + 1][R] + in[j + 1 ][i + 1][R]) / 4.0;  // the average color channels are read to the output
+            out[j][i][G] = (in[j][i][G] + in[j + 1][i][G] + in[j][i + 1][G] + in[j + 1 ][i + 1][G]) / 4.0;
+            out[j][i][B] = (in[j][i][B] + in[j + 1][i][B] + in[j][i + 1][B] + in[j + 1 ][i + 1][B]) / 4.0;
+            out[j][i][A] = (in[j][i][A] + in[j + 1][i][A] + in[j][i + 1][A] + in[j + 1 ][i + 1][A]) / 4.0;
+        }
+    }
 }
