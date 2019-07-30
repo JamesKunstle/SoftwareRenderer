@@ -444,6 +444,7 @@ void copy_vect(float i[4], float o[4]);
 #include "texture_ingestion_utilities.c"
 #include "matrix_utilities.c"
 #include "initialize_gl.c"
+#include "mipmapping_utilities.c"
 
 void draw_point(POINT *p, float blend_weight)
 {
