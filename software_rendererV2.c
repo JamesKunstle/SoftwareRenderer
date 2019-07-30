@@ -1625,7 +1625,6 @@ void record_time()
  */
 void display(void)
 {
-
     if( first_pass )
     {
         start_timer( &sw_renderer_timer );
