@@ -1600,7 +1600,7 @@ void r_obj_file_scenter(char *name, float cx, float cy, float cz)
 
 void record_time()
 {
-    printf("time recorded\n");
+    //printf("time recorded\n");
     if( first_pass )
     {
         float elapsed_sw = elapsed_time( &sw_renderer_timer );
@@ -1613,7 +1613,7 @@ void record_time()
     }
     else
     {
-        printf("ehhhhhhhhhhhhhhhhhhhhhhhhhhhhh\n");
+        printf("Benchmark has ended.\n");
     }
 }
 
@@ -1670,7 +1670,6 @@ void display(void)
     
     if( texturing )
     {
-        printf("Reading texture\n");
         r_binary_text_file( &starter_texture, "rocks_color.ppm" );                // READ IN TEXTURE AND BUMP MAP
         copy_texture( &starter_texture );
         perspective_correct = OFF;                                              // jamesk this is a hack so that the texturing always works for this model
@@ -1691,11 +1690,6 @@ void display(void)
     
     //init_cube( 0.0, 0.0, 0.0, 1);
     //r_obj_file_scenter("teapot.obj", 0.0, 0.0, -10.0);
-    
-//    rotate_model_xy(xangle, yangle, zangle);                                      // IT IS ROTATED
-////    t_model(translation_value - 30);                                              // IT IS TRANSLATED
-//        rotate_model_matrix(xangle, yangle, zangle);
-//        t_model_matrix(translation_value - 30);                                     // matrix versions of^
     
     rotate_translate_matrix( xangle, yangle, zangle, translation_value - 30 );
     
@@ -1763,7 +1757,7 @@ void display(void)
     glutPostRedisplay();//Necessary for Mojave.
     draw_one_frame = 0;
     glClear(GL_COLOR_BUFFER_BIT );
-    printf("Scenes rendered: %d\n", num_renders);
+    //printf("Scenes rendered: %d\n", num_renders);     // jamesk; print num scenes rendered.
     num_renders++;
     
     // block that was being used for writing our rendering times to a savefile.
