@@ -1,3 +1,15 @@
+/* raw matrix copy. no structs. */
+void copy_matrix( float in[4][4], float out[4][4] )
+{
+    for( int j = 0; j < 4; j++ )
+    {
+        for( int i = 0; i < 4; i++ )
+        {
+            out[j][i] = in[j][i];
+        }
+    }
+}
+
 void set_identity_matrix( float m[4][4] )
 {
     for( int i = 0; i < 4; i++ )
@@ -285,17 +297,39 @@ void rotate_model_matrix(float ex_angle, float ey_angle, float ez_angle)
     }
 }
 
-void copy_matrix( float in[4][4], float out[4][4] )
+void set_camera_matrix(MATRIX_4 m, float eye[4], float lookat[4], float up[4])
 {
-    for( int j = 0; j < 4; j++ )
+    float u[4];
+    float v[4];
+    MATRIX_4 t;
+    MATRIX_4 r;
+    
+    
+    
+    subtract_vectors( lookat, eye, v );
+    normalize_vector( v, v );
+    
+    cross_vect( up, v, u ); // getting the perpendicular vector
+    normalize_vector( u, u );
+    
+    cross_vect( v, u, up ); // getting the perpendicular vector
+    normalize_vector( up, up );
+    
+    set_identity_matrix_4( r );
+    set_identity_matrix_4( t );
+    
+    for( int j = 0; j < 3; j++ )
     {
-        for( int i = 0; i < 4; i++ )
-        {
-            out[j][i] = in[j][i];
-        }
+        r.table[j][0] = u[j];
+        r.table[j][1] = up[j];
+        r.table[j][2] = v[j];
     }
+    
+    set_translate_matrix_camera( m.table, -eye[X], -eye[X], -eye[X] );
+    mult_matrix_matrix( t.table, r.table, m.table );
+    // m matrix implicitly passed out of the function.
+    // using this after rotation and translation will allow all of our other math to work.
 }
-
 
 void rotate_translate_matrix( float ex_angle, float ey_angle, float ez_angle, float depth )
 {

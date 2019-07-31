@@ -218,7 +218,12 @@ void calculate_clip_distances( void )
         for( int k = 0; k < 6; k++ )
         {
             p->dist[k] = vect_distance_to_plane( p->world, &frustum[k]);
-            //printf("Distance %f\n", p->dist[k]);
+//            //printf("Distance %f\n", p->dist[k]);
+//            if( k == 4 )
+//            {
+//                printf("distance to near == %f\n", p->dist[k]);
+//            }
+            // jamesk: needs to be removed, from debugging session with camera function.
         }
     }
     

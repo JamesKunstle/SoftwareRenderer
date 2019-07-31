@@ -1373,40 +1373,6 @@ void init_cube( float cx, float cy, float cz, float s )
     add_triangle( 6, 7, 3 );
 }
 
-void set_camera_matrix(MATRIX_4 m, float eye[4], float lookat[4], float up[4])
-{
-    float u[4];
-    float v[4];
-    MATRIX_4 t;
-    MATRIX_4 r;
-    
-    
-    
-    subtract_vectors( lookat, eye, v );
-    normalize_vector( v, v );
-    
-    cross_vect( up, v, u ); // getting the perpendicular vector
-    normalize_vector( u, u );
-    
-    cross_vect( v, u, up ); // getting the perpendicular vector
-    normalize_vector( up, up );
-    
-    set_identity_matrix_4( r );
-    set_identity_matrix_4( t );
-    
-    for( int j = 0; j < 3; j++ )
-    {
-        r.table[j][0] = u[j];
-        r.table[j][1] = up[j];
-        r.table[j][2] = v[j];
-    }
-    
-    set_translate_matrix_camera( m.table, -eye[X], -eye[X], -eye[X] );
-    mult_matrix_matrix( t.table, r.table, m.table );
-    // m matrix implicitly passed out of the function.
-    // using this after rotation and translation will allow all of our other math to work.
-}
-
 void clear_g_buffer( float r, float g, float b, float a )
 {
     for( int j = 0; j < WIN_HEIGHT; j++ )
@@ -1687,8 +1653,14 @@ void display(void)
         read_cube_texture_test();                                                    // READ IN THE CUBE MAP
     }
     
-    
-    init_sphere(1.0, 2.0, 0, 0, -10.0);                                          // 3D OBJECT LOADED INTO THE VERTEX/TRIANGLE LIST
+    if( !camera )
+    {
+        init_sphere(1.0, 2.0, 0, 0, -10.0);                                          // 3D OBJECT LOADED INTO THE VERTEX/TRIANGLE LIST
+    }
+    else
+    {
+        init_sphere(1.0, 2.0, 0, 0, 0);
+    }
     
     //init_cube( 0.0, 0.0, 0.0, 1);
     //r_obj_file_scenter("teapot.obj", 0.0, 0.0, -10.0);
@@ -1761,7 +1733,7 @@ void display(void)
     glClear(GL_COLOR_BUFFER_BIT );
     //printf("Scenes rendered: %d\n", num_renders);     // jamesk; print num scenes rendered.
     num_renders++;
-    
+    printf("eye location: (%f, %f, %f)\n", eye[X], eye[Y], eye[Z]);
     // block that was being used for writing our rendering times to a savefile.
 //    if(num_renders == 210)
 //    {
@@ -1786,26 +1758,35 @@ static void Key(unsigned char key, int x, int y)
 {
     switch (key)
     {
-        case 'a':       draw_one_frame = 1;     glutPostRedisplay();    break;
-        case 'q':       exit(0);                                        break;
+        case '`':       draw_one_frame = 1;     glutPostRedisplay();    break;
+        case '~':       exit(0);                                        break;
         case '\033':    exit(0);                                        break;
             
-        case 't':       xangle += 5;                                    break;
-        case 'g':       xangle -= 5;                                    break;
-        case 'y':       yangle += 5;                                    break;
-        case 'h':       yangle -= 5;                                    break;
-        case 'u':       zangle += 5;                                    break;
-        case 'j':       zangle -= 5;                                    break; // these orient the object that we've drawn.
+        case 'w':       xangle += 5;                                    break;
+        case 's':       xangle -= 5;                                    break;
+        case 'a':       yangle += 5;                                    break;
+        case 'd':       yangle -= 5;                                    break;
+        case 'q':       zangle += 5;                                    break;
+        case 'e':       zangle -= 5;                                    break; // these orient the object that we've drawn.
             
-        case 'd':       translation_value += 0.5;                          break;
-        case 'c':       translation_value -= 0.5;                          break; // these move the object closer or further from the depth camera
+        case 'W':       eye[Y]+=1;                                      break;
+        case 'S':       eye[Y]-=1;                                      break;
             
-        case 'b':        texturing = (1 - texturing);                    break; // turns on texturing
-        case 'n':        c_buff_blending = (1 - c_buff_blending);        break; // turns on color buffer blending
-        case 'm':        d_buff_active = (1 - d_buff_active);            break; // turns on the depth buffer
+        case 'A':       eye[X]+=1;                                      break;
+        case 'D':       eye[X]-=1;                                      break;
             
-        case 'p':        perspective_draw = (1 - perspective_draw);      break;
-        case 'l':       perspective_correct = (1-perspective_correct);   break;
+        case 'Q':       eye[Z]+=1;                                      break;
+        case 'E':       eye[Z]-=1;                                      break;
+            
+        case 'z':       translation_value += 0.5;                          break;
+        case 'x':       translation_value -= 0.5;                          break; // these move the object closer or further from the depth camera
+            
+        case 't':        texturing = (1 - texturing);                    break; // turns on texturing
+        case 'b':        c_buff_blending = (1 - c_buff_blending);        break; // turns on color buffer blending
+        case 'g':        d_buff_active = (1 - d_buff_active);            break; // turns on the depth buffer
+            
+        case 'y':       perspective_draw = (1 - perspective_draw);       break;
+        case 'h':       perspective_correct = (1-perspective_correct);   break;
             
         case 'r':       rasterize = (1 - rasterize);                     break;
             
@@ -1813,23 +1794,24 @@ static void Key(unsigned char key, int x, int y)
         case '@':       naive_mapping = OFF; cylindrical_mapping = ON; spherical_mapping = OFF; cube_mapping = OFF; break;
         case '#':       naive_mapping = OFF; cylindrical_mapping = OFF; spherical_mapping = ON; cube_mapping = OFF;break;
             
-        case 'P':       phong_lighting = (1 - phong_lighting); face_lighting = OFF;        break;
-        case 'F':       face_lighting = (1 - face_lighting); phong_lighting = OFF;        break;
-        case 'D':       depth_of_field = ( 1 - depth_of_field);          break;
+        case 'f':       phong_lighting = (1 - phong_lighting); face_lighting = OFF;        break;
+        case 'v':       face_lighting = (1 - face_lighting); phong_lighting = OFF;        break;
+        case 'Y':       depth_of_field = ( 1 - depth_of_field);          break;
         case 'R':       reflection = 1 - reflection;                     break;
         case 'C':       cube_mapping = ( 1 - cube_mapping); naive_mapping = OFF; cylindrical_mapping = OFF; spherical_mapping = OFF; break;
             
         case '0':       wave+=0.1;                                       break;
         case '9':       wave-=0.1;                                       break;
-        case '6':       modulate = (1 - modulate);                       break;
-        case 'Q':       deferred_rendering = ( 1 - deferred_rendering ); break;
-        case 'H':       use_hardware_opengl = ( 1 - use_hardware_opengl );      break;
-        case 'G':       sw_vertex_processing = ( 1 - sw_vertex_processing );    break;
+        case 'n':       modulate = (1 - modulate);                       break;
+        case 'u':       deferred_rendering = ( 1 - deferred_rendering ); break;
+        case 'j':       use_hardware_opengl = ( 1 - use_hardware_opengl );      break;
+        case 'm':       sw_vertex_processing = ( 1 - sw_vertex_processing );    break;
         case '/':       render_counter_reset();                          break;
-        case 'E':       tex_gen = 1 - tex_gen;                              break;
+        case 'H':       tex_gen = 1 - tex_gen;                              break;
         case '<':       write_timer_savefile(); printf( "Sw: %d  Hw: %d \n", current_savefile.current_sw, current_savefile.current_gl);   break;
         case',':        first_pass = ON;    second_pass = OFF;      break;
         case'.':        second_pass = ON;      first_pass = OFF;    break;
+        case'c':        camera = 1 - camera;                        break;
     }
     draw_one_frame = 1;
     glutPostRedisplay();
