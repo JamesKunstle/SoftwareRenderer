@@ -81,7 +81,6 @@ void mipmap()
     }
     
     triage();
-    
 }
 
 void triage()
@@ -121,6 +120,7 @@ void triage()
             cascade = 1;
         case 10:
             mip_map_fill(10, cascade);
+            break;
         default:
             printf("Error triaging the current mipmap level.\n");
     }
@@ -224,4 +224,64 @@ void mip_map_fill( int LOD, int cascade )
     }
     dest->height = fill_height;
     dest->width = fill_width;
+}
+
+void mm_to_ct( int LOD ) // copies a mipmap image data into the current_texture image data so that an object will be textured by mipmap level.
+{
+    MM_IMAGE *mm_l;
+    
+    switch ( LOD )
+    {
+        case 0:
+            mm_l = &mm.zero;
+            break;
+        case 1:
+            mm_l = &mm.one;
+            break;
+        case 2:
+            mm_l = &mm.two;
+            break;
+        case 3:
+            mm_l = &mm.three;
+            break;
+        case 4:
+            mm_l = &mm.four;
+            break;
+        case 5:
+            mm_l = &mm.five;
+            break;
+        case 6:
+            mm_l = &mm.six;
+            break;
+        case 7:
+            mm_l = &mm.seven;
+            break;
+        case 8:
+            mm_l = &mm.eight;
+            break;
+        case 9:
+            mm_l = &mm.nine;
+            break;
+        case 10:
+            mm_l = &mm.ten;
+            break;
+        default:
+            printf("Oops!\n");
+            break;
+    }
+    
+    int height = mm_l->height;
+    int width = mm_l->width;
+    
+    for( int j = 0; j < height; j++ )
+    {
+        for( int i = 0; i < width; i++ ) // box-filter
+        {
+            copy_vect_RGBA( mm_l->data[j][i], current_texture.data[j][i] );
+        }
+    }
+    current_texture.height = height;
+    current_texture.width = width;
+    
+    
 }

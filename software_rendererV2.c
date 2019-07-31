@@ -402,6 +402,8 @@ int second_pass =                OFF;
 
 int camera =                     OFF;   // are we moving the camera or are we moving the object with the same camera?
 
+int mipmapping = OFF;
+
 /*************************************************************************/
 /* utility functions                                                     */
 /*************************************************************************/
@@ -1641,6 +1643,12 @@ void display(void)
         r_binary_text_file( &starter_texture, "rocks_color.ppm" );                // READ IN TEXTURE AND BUMP MAP
         copy_texture( &starter_texture );
         perspective_correct = OFF;                                              // jamesk this is a hack so that the texturing always works for this model
+        mipmap();
+        if( mipmapping )
+        {
+            mm_to_ct( 8 );                                                          // copies image data from mipmap level LOD to current_texture.
+        }
+        
     }
     
     if( bumpmapping)
@@ -1811,6 +1819,7 @@ static void Key(unsigned char key, int x, int y)
         case',':        first_pass = ON;    second_pass = OFF;      break;
         case'.':        second_pass = ON;      first_pass = OFF;    break;
         case'c':        camera = 1 - camera;                        break;
+        case'T':        mipmapping = 1 - mipmapping;                break;
     }
     draw_one_frame = 1;
     glutPostRedisplay();

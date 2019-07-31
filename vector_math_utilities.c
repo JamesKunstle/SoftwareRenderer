@@ -47,6 +47,14 @@ void copy_vect(float i[4], float o[4])
     o[3] = i[3];
 }
 
+void copy_vect_RGBA( unsigned char i[4], unsigned char o[4])
+{
+    o[0] = i[0];
+    o[1] = i[1];
+    o[2] = i[2];
+    o[3] = i[3];
+}
+
 void set_vect(float out[4], float x, float y, float z)
 {
     out[X] = x;
