@@ -94,17 +94,25 @@ void set_translate_matrix_camera( float m[4][4], float xdepth, float ydepth, flo
 
 void mult_matrix_matrix( float m1[4][4], float m2[4][4], float mout[4][4] )
 {
+    float temp[4][4];
+    for( int j = 0; j < 4; j++ )
+    {
+        for( int i = 0; i < 4; i++ )
+        {
+            temp[j][i] = 0;
+            
+            for( int k = 0; k < 4; k++ )
+            {
+                temp[j][i] += m1[j][k] * m2[k][i];
+            }
+        }
+    }
     
     for( int j = 0; j < 4; j++ )
     {
         for( int i = 0; i < 4; i++ )
         {
-            mout[j][i] = 0;
-            
-            for( int k = 0; k < 4; k++ )
-            {
-                mout[j][i] += m1[j][k] * m2[k][i];
-            }
+            mout[j][i] = temp[j][i];
         }
     }
 }
@@ -167,19 +175,21 @@ void set_scale_matrix( float m[4][4], float sx, float sy, float sz )
 /* create matrix that will rotate a point around the x-axis. */
 void set_rotate_x_matrix( float m[4][4], float xangle )
 {
+    float theta = xangle / 360.0 * 2.0 * 3.141592654;
+    
     m[0][0] = 1;
     m[0][1] = 0;
     m[0][2] = 0;
     m[0][3] = 0;
     
     m[1][0] = 0;
-    m[1][1] = cos(xangle);
-    m[1][2] = sin(xangle);
+    m[1][1] = cos(theta);
+    m[1][2] = sin(theta);
     m[1][3] = 0;
     
     m[2][0] = 0;
-    m[2][1] = -sin(xangle);
-    m[2][2] = cos(xangle);
+    m[2][1] = -sin(theta);
+    m[2][2] = cos(theta);
     m[2][3] = 0;
     
     m[3][0] = 0;
@@ -191,9 +201,11 @@ void set_rotate_x_matrix( float m[4][4], float xangle )
 
 void set_rotate_y_matrix( float m[4][4], float yangle )
 {
-    m[0][0] = cos(yangle);
+    float theta = yangle / 360.0 * 2.0 * 3.141592654;
+    
+    m[0][0] = cos(theta);
     m[0][1] = 0;
-    m[0][2] = -sin(yangle);
+    m[0][2] = -sin(theta);
     m[0][3] = 0;
     
     m[1][0] = 0;
@@ -201,9 +213,9 @@ void set_rotate_y_matrix( float m[4][4], float yangle )
     m[1][2] = 0;
     m[1][3] = 0;
     
-    m[2][0] = sin(yangle);
+    m[2][0] = sin(theta);
     m[2][1] = 0;
-    m[2][2] = cos(yangle);
+    m[2][2] = cos(theta);
     m[2][3] = 0;
     
     m[3][0] = 0;
@@ -215,13 +227,15 @@ void set_rotate_y_matrix( float m[4][4], float yangle )
 
 void set_rotate_z_matrix( float m[4][4], float zangle )
 {
-    m[0][0] = cos(zangle);
-    m[0][1] = sin(zangle);
+    float theta = zangle / 360.0 * 2.0 * 3.141592654;
+    
+    m[0][0] = cos(theta);
+    m[0][1] = sin(theta);
     m[0][2] = 0;
     m[0][3] = 0;
     
-    m[1][0] = -sin(zangle);
-    m[1][1] = cos(zangle);
+    m[1][0] = -sin(theta);
+    m[1][1] = cos(theta);
     m[1][2] = 0;
     m[1][3] = 0;
     
@@ -252,19 +266,27 @@ void scale_model_matrix( float sx, float sy, float sz )
 // for every point in the vertices, change the spatial x, y, z dimensions using the input angles and the point world properties
 void rotate_model_matrix(float ex_angle, float ey_angle, float ez_angle)
 {
-    float xrotate[4][4];
+    float xrotate[4][4]; //jamesk come back to concatenate
     float yrotate[4][4];
     float zrotate[4][4];
+    float m[4][4];
     
     set_rotate_x_matrix( xrotate, ex_angle );
     set_rotate_y_matrix( yrotate, ey_angle );
     set_rotate_z_matrix( zrotate, ez_angle ); // local matrices are filled with values.
     
+    set_identity_matrix( m );
+    
+    mult_matrix_matrix(xrotate, yrotate, m);
+    mult_matrix_matrix(zrotate, m, m);
+    
+    
     for( int i = 0; i < numvertices; i++) // every vertex is transformed based on the matrices provided.
     {
-        mult_vect_matrix( vertex_list[i].world, xrotate, vertex_list[i].world );
-        mult_vect_matrix( vertex_list[i].world, yrotate, vertex_list[i].world );
-        mult_vect_matrix( vertex_list[i].world, zrotate, vertex_list[i].world );
+//        mult_vect_matrix( vertex_list[i].world, xrotate, vertex_list[i].world );
+//        mult_vect_matrix( vertex_list[i].world, yrotate, vertex_list[i].world );
+//        mult_vect_matrix( vertex_list[i].world, zrotate, vertex_list[i].world );
+          mult_vect_matrix( vertex_list[i].world, m, vertex_list[i].world );
         
     }
 }
