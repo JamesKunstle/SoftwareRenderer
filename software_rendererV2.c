@@ -444,7 +444,7 @@ void copy_vect(float i[4], float o[4]);
 #include "texture_ingestion_utilities.c"
 #include "matrix_utilities.c"
 #include "initialize_gl.c"
-#include "mipmapping_utilities.c"
+//#include "mipmapping_utilities.c"
 
 void draw_point(POINT *p, float blend_weight)
 {
@@ -1688,15 +1688,16 @@ void display(void)
     
     
     init_sphere(1.0, 2.0, 0, 0, -10.0);                                          // 3D OBJECT LOADED INTO THE VERTEX/TRIANGLE LIST
+    
     //init_cube( 0.0, 0.0, 0.0, 1);
     //r_obj_file_scenter("teapot.obj", 0.0, 0.0, -10.0);
     
-    rotate_model_xy(xangle, yangle, zangle);                                      // IT IS ROTATED
-    t_model(translation_value - 30);                                              // IT IS TRANSLATED
-    //    rotate_model_matrix(xangle, yangle, zangle);
-    //    t_model_matrix(translation_value - 30);                                     // matrix versions of^
+//    rotate_model_xy(xangle, yangle, zangle);                                      // IT IS ROTATED
+////    t_model(translation_value - 30);                                              // IT IS TRANSLATED
+//        rotate_model_matrix(xangle, yangle, zangle);
+//        t_model_matrix(translation_value - 30);                                     // matrix versions of^
     
-    //rotate_translate_matrix( xangle, yangle, zangle, translation_value - 30 );
+    rotate_translate_matrix( xangle, yangle, zangle, translation_value - 30 );
     
     //    MATRIX_4 camera_matrix;
     //    set_camera_matrix( camera_matrix, eye, lookat, global_camera.up );
@@ -1764,18 +1765,20 @@ void display(void)
     glClear(GL_COLOR_BUFFER_BIT );
     printf("Scenes rendered: %d\n", num_renders);
     num_renders++;
-    if(num_renders == 210)
-    {
-        first_pass = OFF;
-        second_pass = ON;
-        use_hardware_opengl = ON;
-    }
-    if(num_renders == 410)
-    {
-        first_pass = OFF;
-        second_pass = OFF;
-        write_timer_savefile();
-    }
+    
+    // block that was being used for writing our rendering times to a savefile.
+//    if(num_renders == 210)
+//    {
+//        first_pass = OFF;
+//        second_pass = ON;
+//        use_hardware_opengl = ON;
+//    }
+//    if(num_renders == 410)
+//    {
+//        first_pass = OFF;
+//        second_pass = OFF;
+//        write_timer_savefile();
+//    }
     
     
 }

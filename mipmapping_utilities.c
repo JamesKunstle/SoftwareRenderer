@@ -25,7 +25,6 @@ MIPMAP mm;
 
 /* ============================   PROTOTYPES     ============================ */
 void triage_mipmap_fill( MIPMAP *cmm);
-void mipmap_fill( float in[][][], float out[][][], int height, int width);
 /* ========================================================================== */
 
 void mipmap()                                      // reads in the data from the current_texture array.
