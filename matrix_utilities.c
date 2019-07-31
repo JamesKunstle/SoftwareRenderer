@@ -108,13 +108,7 @@ void mult_matrix_matrix( float m1[4][4], float m2[4][4], float mout[4][4] )
         }
     }
     
-    for( int j = 0; j < 4; j++ )
-    {
-        for( int i = 0; i < 4; i++ )
-        {
-            mout[j][i] = temp[j][i];
-        }
-    }
+    copy_matrix( temp, mout );
 }
 
 
@@ -291,26 +285,46 @@ void rotate_model_matrix(float ex_angle, float ey_angle, float ez_angle)
     }
 }
 
+void copy_matrix( float in[4][4], float out[4][4] )
+{
+    for( int j = 0; j < 4; j++ )
+    {
+        for( int i = 0; i < 4; i++ )
+        {
+            out[j][i] = in[j][i];
+        }
+    }
+}
+
 
 void rotate_translate_matrix( float ex_angle, float ey_angle, float ez_angle, float depth )
 {
     float m[4][4];
     
-    float xrotate[4][4];
-    float yrotate[4][4];
-    float zrotate[4][4];
-    
-    set_rotate_x_matrix( xrotate, ex_angle );
-    set_rotate_y_matrix( yrotate, ey_angle );
-    set_rotate_z_matrix( zrotate, ez_angle );
-    
-    float translate_matrix[4][4];
-    set_translate_matrix( translate_matrix, depth ); // fill the matrix with the correct values
-    
-    mult_matrix_matrix(xrotate, yrotate, m);
-    mult_matrix_matrix(zrotate, m, m);
-    mult_matrix_matrix(m, translate_matrix, m); // rotate, then translate
-    //mult_matrix_matrix(master_matrix, mask, master_matrix);
+    if( !camera )
+    {
+        float xrotate[4][4];
+        float yrotate[4][4];
+        float zrotate[4][4];
+        
+        set_rotate_x_matrix( xrotate, ex_angle );
+        set_rotate_y_matrix( yrotate, ey_angle );
+        set_rotate_z_matrix( zrotate, ez_angle );
+        
+        float translate_matrix[4][4];
+        set_translate_matrix( translate_matrix, depth ); // fill the matrix with the correct values
+        
+        mult_matrix_matrix(xrotate, yrotate, m);
+        mult_matrix_matrix(zrotate, m, m);
+        mult_matrix_matrix(m, translate_matrix, m); // rotate, then translate
+        //mult_matrix_matrix(master_matrix, mask, master_matrix);
+    }
+    else
+    {   MATRIX_4 c;
+        set_camera_matrix( c, eye, lookat, global_camera.up );
+        copy_matrix( c.table, m );
+    }
+
     
     for( int i = 0; i < numvertices; i++)
     {

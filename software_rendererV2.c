@@ -396,9 +396,11 @@ GL_IMAGE current_gl_image;
 
 int num_renders = 0;
 
-int first_pass = ON;
+int first_pass =                 ON;
 
-int second_pass = OFF;
+int second_pass =                OFF;
+
+int camera =                     OFF;   // are we moving the camera or are we moving the object with the same camera?
 
 /*************************************************************************/
 /* utility functions                                                     */
