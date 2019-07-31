@@ -1733,7 +1733,6 @@ void display(void)
     glClear(GL_COLOR_BUFFER_BIT );
     //printf("Scenes rendered: %d\n", num_renders);     // jamesk; print num scenes rendered.
     num_renders++;
-    printf("eye location: (%f, %f, %f)\n", eye[X], eye[Y], eye[Z]);
     // block that was being used for writing our rendering times to a savefile.
 //    if(num_renders == 210)
 //    {
