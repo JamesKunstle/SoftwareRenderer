@@ -129,11 +129,13 @@ void triage()
     
 void mip_map_fill( int LOD, int cascade )
 {
-    int fill_height;
+    int fill_height;    // dimensions of the data array that is read from.
     int fill_width;
-    MM_IMAGE *dest;
-    IMAGE *send_i;
-    MM_IMAGE *send_mm;
+    
+    MM_IMAGE *dest;     // destination texture image
+    
+    IMAGE *send_i;      // the sending image if the sender is the current_texture
+    MM_IMAGE *send_mm;  // the sending image if if the sender is one of the previous mipmap textures.
     
     switch ( LOD )
     {
@@ -198,32 +200,45 @@ void mip_map_fill( int LOD, int cascade )
     
     if( cascade )
     {
-        fill_height = send_mm->height / 2;   // integer division to handle odd sized- areas.
-        fill_width =  send_mm->width / 2;
+        fill_height = send_mm->height;
+        fill_width =  send_mm->width;
+        
+        printf("Height and width = %d, %d\n", fill_height, fill_width);
+        
+        int m = 0;
+        int n = 0;
         
         for( int j = 0; j < fill_height - 2; j += 2 )
         {
             for( int i = 0; i < fill_width - 2; i += 2) // box-filter
             {
-                average_RGBA_channels( send_mm->data[j][i], send_mm->data[j + 1][i], send_mm->data[j][i + 1], send_mm->data[j + 1][i + 1], dest->data[j][i] );
+                average_RGBA_channels( send_mm->data[j][i], send_mm->data[j + 1][i], send_mm->data[j][i + 1], send_mm->data[j + 1][i + 1], dest->data[m][n++] );
             }
+            m++;
         }
     }
     else
     {
-        fill_height = send_i->height / 2;   // integer division to handle odd sized- areas.
-        fill_width =  send_i->width / 2;
+        fill_height = send_i->height;   // integer division to handle odd sized- areas.
+        fill_width =  send_i->width;
+        
+        printf("Non-cascade\n");
+        printf("Height and width = %d, %d\n", fill_height, fill_width);
+        
+        int m = 0;
+        int n = 0;
         
         for( int j = 0; j < fill_height - 2; j += 2 )
         {
             for( int i = 0; i < fill_width - 2; i += 2) // box-filter
             {
-                average_RGBA_channels( send_i->data[j][i], send_i->data[j + 1][i], send_i->data[j][i + 1], send_i->data[j + 1][i + 1], dest->data[j][i] );
+                average_RGBA_channels( send_i->data[j][i], send_i->data[j + 1][i], send_i->data[j][i + 1], send_i->data[j + 1][i + 1], dest->data[m][n++] );
             }
+            m++;
         }
     }
-    dest->height = fill_height;
-    dest->width = fill_width;
+    dest->height = fill_height / 2;
+    dest->width = fill_width / 2;
 }
 
 void mm_to_ct( int LOD ) // copies a mipmap image data into the current_texture image data so that an object will be textured by mipmap level.

@@ -404,6 +404,8 @@ int camera =                     OFF;   // are we moving the camera or are we mo
 
 int mipmapping = OFF;
 
+int mipmap_level = 0;
+
 /*************************************************************************/
 /* utility functions                                                     */
 /*************************************************************************/
@@ -1762,6 +1764,11 @@ void display(void)
         if( mipmapping )
         {
             mm_to_ct( 2 );                                                          // copies image data from mipmap level LOD to current_texture.
+            printf("current dimensions of C_T = %d, %d\n", current_texture.height, current_texture.width);
+        }
+        else
+        {
+                printf("current dimensions of C_T = %d, %d\n", current_texture.height, current_texture.width);
         }
         
     }
@@ -1938,6 +1945,8 @@ static void Key(unsigned char key, int x, int y)
         case'.':        second_pass = ON;      first_pass = OFF;    break;
         case'c':        camera = 1 - camera;                        break;
         case'T':        mipmapping = 1 - mipmapping;                break;
+        case'+':        mipmap_level++;                                    break;
+        case'-':        mipmap_level--;                                    break;
     }
     draw_one_frame = 1;
     glutPostRedisplay();
