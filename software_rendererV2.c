@@ -1763,7 +1763,7 @@ void display(void)
         mipmap();
         if( mipmapping )
         {
-            mm_to_ct( 2 );                                                          // copies image data from mipmap level LOD to current_texture.
+            mm_to_ct( 5 );                                                          // copies image data from mipmap level LOD to current_texture.
             printf("current dimensions of C_T = %d, %d\n", current_texture.height, current_texture.width);
         }
         else

@@ -41,10 +41,10 @@ void mip_map_fill( int LOD, int cascade );
 
 void average_RGBA_channels( unsigned char zero[4], unsigned char one[4], unsigned char two[4], unsigned char three[4], unsigned char output[4] )
 {
-    output[R] = ( zero[R] + one[R] + two[R] + three[R] ) / 4.0;
-    output[G] = ( zero[G] + one[G] + two[G] + three[G] ) / 4.0;
-    output[B] = ( zero[B] + one[B] + two[B] + three[B] ) / 4.0;
-    output[A] = ( zero[A] + one[A] + two[A] + three[A] ) / 4.0;
+    output[R] = ( zero[R] + one[R] + two[R] + three[R] ) / 4;
+    output[G] = ( zero[G] + one[G] + two[G] + three[G] ) / 4;
+    output[B] = ( zero[B] + one[B] + two[B] + three[B] ) / 4;
+    output[A] = ( zero[A] + one[A] + two[A] + three[A] ) / 4;
 }
 
 void mipmap()
@@ -214,16 +214,16 @@ void mip_map_fill( int LOD, int cascade )
             {
                 average_RGBA_channels( send_mm->data[j][i], send_mm->data[j + 1][i], send_mm->data[j][i + 1], send_mm->data[j + 1][i + 1], dest->data[m][n++] );
             }
+            n = 0;
             m++;
         }
+        printf("Wrote to %d pixels\n", m * n);
     }
     else
     {
         read_height = send_i->height;   // integer division to handle odd sized- areas.
         read_width =  send_i->width;
         
-        printf("Non-cascade\n");
-        printf("Height and width = %d, %d\n", read_height, read_width);
         
         int m = 0;
         int n = 0;
@@ -234,8 +234,10 @@ void mip_map_fill( int LOD, int cascade )
             {
                 average_RGBA_channels( send_i->data[j][i], send_i->data[j + 1][i], send_i->data[j][i + 1], send_i->data[j + 1][i + 1], dest->data[m][n++] );
             }
+            n = 0;
             m++;
         }
+        printf("Wrote to %d pixels\n", m * n);
     }
     dest->height = read_height / 2;
     dest->width = read_width / 2;
@@ -287,6 +289,8 @@ void mm_to_ct( int LOD ) // copies a mipmap image data into the current_texture 
     
     int height = mm_l->height;
     int width = mm_l->width;
+    
+    printf("new image size: %d, %d\n", height, width);
     
     for( int j = 0; j < height; j++ )
     {
