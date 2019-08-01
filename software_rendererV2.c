@@ -1763,14 +1763,8 @@ void display(void)
         mipmap();
         if( mipmapping )
         {
-            mm_to_ct( 5 );                                                          // copies image data from mipmap level LOD to current_texture.
-            printf("current dimensions of C_T = %d, %d\n", current_texture.height, current_texture.width);
+            mm_to_ct( mipmap_level );                                                          // copies image data from mipmap
         }
-        else
-        {
-                printf("current dimensions of C_T = %d, %d\n", current_texture.height, current_texture.width);
-        }
-        
     }
     
     if( bumpmapping)
@@ -1945,8 +1939,8 @@ static void Key(unsigned char key, int x, int y)
         case'.':        second_pass = ON;      first_pass = OFF;    break;
         case'c':        camera = 1 - camera;                        break;
         case'T':        mipmapping = 1 - mipmapping;                break;
-        case'+':        mipmap_level++;                                    break;
-        case'-':        mipmap_level--;                                    break;
+        case'+':        if( mipmap_level < 10 ) {mipmap_level++;}     break;
+        case'_':        if( mipmap_level > 0 ) {mipmap_level--;}       break;
     }
     draw_one_frame = 1;
     glutPostRedisplay();
