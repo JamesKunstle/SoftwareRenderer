@@ -439,6 +439,8 @@ void cube_map_vect( float v[4], float tex[4], int *index );
 
 void copy_vect(float i[4], float o[4]);
 
+void init_model();
+
 
 // These are collections of libraries that the renderer uses. Each is within the same folder as SWRV2.c
 #include "vector_math_utilities.c"
@@ -1232,6 +1234,119 @@ void init_sphere(float scale, float radius, float centerx, float centery, float 
     numtriangles = n;
 }
 
+void init_plane()
+{
+    // two triangles that cover the entire texture coordinate space
+    
+    vertex_list[0].world[X] = -0.5;
+    vertex_list[0].world[Y] = 0.5;
+    vertex_list[0].world[Z] = 0.0;
+    vertex_list[0].STRQ[S] = 0.0;
+    vertex_list[0].STRQ[T] = 0.0;//top left
+    vertex_list[0].RGBA[R] = 1.0;
+    vertex_list[0].RGBA[G] = 1.0;
+    vertex_list[0].RGBA[B] = 1.0;
+    
+    vertex_list[1].world[X] = -0.5;
+    vertex_list[1].world[Y] = -0.5;
+    vertex_list[1].world[Z] = 0.0;
+    vertex_list[1].STRQ[S] = 0.0;
+    vertex_list[1].STRQ[T] = 1.0;//b left
+    vertex_list[1].RGBA[R] = 1.0;
+    vertex_list[1].RGBA[G] = 1.0;
+    vertex_list[1].RGBA[B] = 1.0;
+    
+    vertex_list[2].world[X] = 0.5;
+    vertex_list[2].world[Y] = -0.5;
+    vertex_list[2].world[Z] = 0.0;
+    vertex_list[2].STRQ[S] = 1.0;
+    vertex_list[2].STRQ[T] = 1.0;//b right
+    vertex_list[2].RGBA[R] = 1.0;
+    vertex_list[2].RGBA[G] = 1.0;
+    vertex_list[2].RGBA[B] = 1.0;
+    
+    vertex_list[3].world[X] = -0.5;
+    vertex_list[3].world[Y] = 0.5;
+    vertex_list[3].world[Z] = 0.0;
+    vertex_list[3].STRQ[S] = 0.0;
+    vertex_list[3].STRQ[T] = 0.0;//t l
+    vertex_list[3].RGBA[R] = 1.0;
+    vertex_list[3].RGBA[G] = 1.0;
+    vertex_list[3].RGBA[B] = 1.0;
+    
+    vertex_list[4].world[X] = 0.5;
+    vertex_list[4].world[Y] = -0.5;
+    vertex_list[4].world[Z] = 0.0;
+    vertex_list[4].STRQ[S] = 1.0;
+    vertex_list[4].STRQ[T] = 1.0;
+    vertex_list[4].RGBA[R] = 1.0;
+    vertex_list[4].RGBA[G] = 1.0;
+    vertex_list[4].RGBA[B] = 1.0;
+    
+    vertex_list[5].world[X] = 0.5;
+    vertex_list[5].world[Y] = 0.5;
+    vertex_list[5].world[Z] = 0.0;
+    vertex_list[5].STRQ[S] = 1.0;
+    vertex_list[5].STRQ[T] = 0.0;
+    vertex_list[5].RGBA[R] = 1.0;
+    vertex_list[5].RGBA[G] = 1.0;
+    vertex_list[5].RGBA[B] = 1.0;
+    
+    triangle_list[0].vertex[0] = 0;
+    triangle_list[0].vertex[1] = 1;
+    triangle_list[0].vertex[2] = 2;
+    
+    triangle_list[1].vertex[0] = 3;
+    triangle_list[1].vertex[1] = 4;
+    triangle_list[1].vertex[2] = 5;
+    
+    numvertices = 6;
+    numtriangles = 2;
+    
+    
+    
+}
+
+void init_quad( float x, float y, float z, float s )
+{
+    init_model();
+    int v_list = 0;
+    float color[4];
+    set_vect_4( color,  1,  0,  0,  0 );
+    
+    float offset = sqrt( pow( s, 2) / 2.0 );    // half of the side length of a quad.
+    
+    set_vect_4( vertex_list[v_list].world, x - offset, y + offset, z, 1.0 ); //0
+    set_vect_4( vertex_list[v_list].STRQ, 0, 0, 0, 1 );
+    copy_vect_RGBA_float( color, vertex_list[v_list++].RGBA);
+    
+    set_vect_4( vertex_list[v_list].world, x + offset, y + offset, z, 1.0 ); //1
+    set_vect_4( vertex_list[v_list].STRQ, 0, 1, 0, 1 );
+    copy_vect_RGBA_float( color, vertex_list[v_list++].RGBA);
+    
+    set_vect_4( vertex_list[v_list].world, x + offset, y - offset, z, 1.0 ); //2
+    set_vect_4( vertex_list[v_list].STRQ, 1, 1, 0, 1 );
+    copy_vect_RGBA_float( color, vertex_list[v_list++].RGBA);
+    
+    set_vect_4( vertex_list[v_list].world, x + offset, y - offset, z, 1.0 ); //3
+    set_vect_4( vertex_list[v_list].STRQ, 1, 1, 0, 1 );
+    copy_vect_RGBA_float( color, vertex_list[v_list++].RGBA);
+    
+    set_vect_4( vertex_list[v_list].world, x - offset, y - offset, z, 1.0 ); //4
+    set_vect_4( vertex_list[v_list].STRQ, 1, 0, 0, 1 );
+    copy_vect_RGBA_float( color, vertex_list[v_list++].RGBA);
+    
+    set_vect_4( vertex_list[v_list].world, x - offset, y + offset, z, 1.0 ); //4
+    set_vect_4( vertex_list[v_list].STRQ, 0, 0, 0, 1 );
+    copy_vect_RGBA_float( color, vertex_list[v_list++].RGBA);
+    
+    numvertices = 6;
+    
+    add_triangle( 0, 1, 2 );
+    add_triangle( 3, 4, 5 );
+    
+}
+
 void caluculate_light_vectors() // will give us the normalized distance between the light point and the object point.
 {
     POINT *p;
@@ -1646,7 +1761,7 @@ void display(void)
         mipmap();
         if( mipmapping )
         {
-            mm_to_ct( 8 );                                                          // copies image data from mipmap level LOD to current_texture.
+            mm_to_ct( 2 );                                                          // copies image data from mipmap level LOD to current_texture.
         }
         
     }
@@ -1660,17 +1775,20 @@ void display(void)
     {
         read_cube_texture_test();                                                    // READ IN THE CUBE MAP
     }
+
+    init_quad( 0.0, 0.0, -10.0, 5);
+    //init_plane();
     
-    if( !camera )
-    {
-        init_sphere(1.0, 2.0, 0, 0, -10.0);                                          // 3D OBJECT LOADED INTO THE VERTEX/TRIANGLE LIST
-    }
-    else
-    {
-        init_sphere(1.0, 2.0, 0, 0, 0);
-    }
+//    if( !camera )
+//    {
+//        init_sphere(1.0, 2.0, 0, 0, -10.0);                                          // 3D OBJECT LOADED INTO THE VERTEX/TRIANGLE LIST
+//    }
+//    else
+//    {
+//        init_sphere(1.0, 2.0, 0, 0, 0);
+//    }
     
-    //init_cube( 0.0, 0.0, 0.0, 1);
+    //init_cube( 0.0, 0.0, -10.0, 1);
     //r_obj_file_scenter("teapot.obj", 0.0, 0.0, -10.0);
     
     rotate_translate_matrix( xangle, yangle, zangle, translation_value - 30 );
