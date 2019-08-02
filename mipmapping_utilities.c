@@ -34,7 +34,7 @@ MIPMAP mm;
 
 /* ============================   PROTOTYPES     ============================ */
 void average_RGBA_channels( unsigned char zero[4], unsigned char one[4], unsigned char two[4], unsigned char three[4], unsigned char output[4] );
-void mipmap();
+int mipmap();
 void triage();
 void mip_map_fill( int LOD, int cascade );
 /* ========================================================================== */
@@ -47,7 +47,7 @@ void average_RGBA_channels( unsigned char zero[4], unsigned char one[4], unsigne
     output[A] = ( zero[A] + one[A] + two[A] + three[A] ) / 4;
 }
 
-void mipmap()
+int mipmap()
 {
     int height    = current_texture.height;
     int width     = current_texture.width;
@@ -81,6 +81,8 @@ void mipmap()
     }
     
     triage();
+    
+    return mm.big_map;  // returns the max_lod of the texture.
 }
 
 void triage()
@@ -302,5 +304,10 @@ void mm_to_ct( int LOD ) // copies a mipmap image data into the current_texture 
     current_texture.height = height;
     current_texture.width = width;
     
+    
+}
+
+void brew( int max_lod, float psi, unsigned char color[4] )
+{
     
 }

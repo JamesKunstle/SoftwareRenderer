@@ -268,7 +268,7 @@ float yangle =  0.0;
 float zangle =  0.0;                         //^ angles 3D world model rotated by
 
 
-float near =    10.0;                         // definition of furthest 'z' axis boundaries of our 3D models
+float near =    20.0;                         // definition of furthest 'z' axis boundaries of our 3D models
 
 float far =     -40.0;
 
@@ -1318,11 +1318,11 @@ void init_quad( float x, float y, float z, float s )
     
     float offset = sqrt( pow( s, 2) / 2.0 );    // half of the side length of a quad.
     
-    set_vect_4( vertex_list[v_list].world, x - offset, y + offset, z, 1.0 ); //0
+    set_vect_4( vertex_list[v_list].world, x - offset, y + offset, z - 80, 1.0 ); //0
     set_vect_4( vertex_list[v_list].STRQ, 0, 0, 0, 1 );
     copy_vect_RGBA_float( color, vertex_list[v_list++].RGBA);
     
-    set_vect_4( vertex_list[v_list].world, x + offset, y + offset, z, 1.0 ); //1
+    set_vect_4( vertex_list[v_list].world, x + offset, y + offset, z - 80, 1.0 ); //1
     set_vect_4( vertex_list[v_list].STRQ, 0, 1, 0, 1 );
     copy_vect_RGBA_float( color, vertex_list[v_list++].RGBA);
     
@@ -1338,7 +1338,7 @@ void init_quad( float x, float y, float z, float s )
     set_vect_4( vertex_list[v_list].STRQ, 1, 0, 0, 1 );
     copy_vect_RGBA_float( color, vertex_list[v_list++].RGBA);
     
-    set_vect_4( vertex_list[v_list].world, x - offset, y + offset, z, 1.0 ); //4
+    set_vect_4( vertex_list[v_list].world, x - offset, y + offset, z - 80, 1.0 ); //5
     set_vect_4( vertex_list[v_list].STRQ, 0, 0, 0, 1 );
     copy_vect_RGBA_float( color, vertex_list[v_list++].RGBA);
     
@@ -1347,6 +1347,74 @@ void init_quad( float x, float y, float z, float s )
     add_triangle( 0, 1, 2 );
     add_triangle( 3, 4, 5 );
     
+}
+
+void init_mega_quad( float x, float y, float z, float s )
+{
+    init_model();
+    int v_list = 0;
+    float color[4];
+    set_vect_4( color,  1,  0,  0,  0 );
+    
+    float offset = sqrt( pow( s, 2) / 2.0 );    // half of the side length of a quad.
+    
+    set_vect_4( vertex_list[v_list].world, x - offset, y, z - 40, 1.0 ); //0
+    set_vect_4( vertex_list[v_list].STRQ, 0, 0, 0, 1 );
+    copy_vect_RGBA_float( color, vertex_list[v_list++].RGBA);
+    
+    set_vect_4( vertex_list[v_list].world, x + offset, y, z - 40, 1.0 ); //1
+    set_vect_4( vertex_list[v_list].STRQ, 0, 1, 0, 1 );
+    copy_vect_RGBA_float( color, vertex_list[v_list++].RGBA);
+    
+    set_vect_4( vertex_list[v_list].world, x + offset, y - offset, z, 1.0 ); //2
+    set_vect_4( vertex_list[v_list].STRQ, 1, 1, 0, 1 );
+    copy_vect_RGBA_float( color, vertex_list[v_list++].RGBA);
+    
+    set_vect_4( vertex_list[v_list].world, x + offset, y - offset, z, 1.0 ); //3
+    set_vect_4( vertex_list[v_list].STRQ, 1, 1, 0, 1 );
+    copy_vect_RGBA_float( color, vertex_list[v_list++].RGBA);
+    
+    set_vect_4( vertex_list[v_list].world, x - offset, y - offset, z, 1.0 ); //4
+    set_vect_4( vertex_list[v_list].STRQ, 1, 0, 0, 1 );
+    copy_vect_RGBA_float( color, vertex_list[v_list++].RGBA);
+    
+    set_vect_4( vertex_list[v_list].world, x - offset, y, z - 40, 1.0 ); //5
+    set_vect_4( vertex_list[v_list].STRQ, 0, 0, 0, 1 );
+    copy_vect_RGBA_float( color, vertex_list[v_list++].RGBA);
+    
+    // end first quad
+    
+    set_vect_4( vertex_list[v_list].world, x - offset, y, z - 40, 1.0 ); //6
+    set_vect_4( vertex_list[v_list].STRQ, 0, 0, 0, 1 );
+    copy_vect_RGBA_float( color, vertex_list[v_list++].RGBA);
+    
+    set_vect_4( vertex_list[v_list].world, x + offset, y, z - 40, 1.0 ); //7
+    set_vect_4( vertex_list[v_list].STRQ, 0, 1, 0, 1 );
+    copy_vect_RGBA_float( color, vertex_list[v_list++].RGBA);
+    
+    set_vect_4( vertex_list[v_list].world, x + offset, y + offset, z - 80, 1.0 ); //8
+    set_vect_4( vertex_list[v_list].STRQ, 1, 1, 0, 1 );
+    copy_vect_RGBA_float( color, vertex_list[v_list++].RGBA);
+    
+    set_vect_4( vertex_list[v_list].world, x + offset, y + offset, z - 80, 1.0 ); //9
+    set_vect_4( vertex_list[v_list].STRQ, 1, 1, 0, 1 );
+    copy_vect_RGBA_float( color, vertex_list[v_list++].RGBA);
+    
+    set_vect_4( vertex_list[v_list].world, x - offset, y + offset, z - 80, 1.0 ); //10
+    set_vect_4( vertex_list[v_list].STRQ, 1, 0, 0, 1 );
+    copy_vect_RGBA_float( color, vertex_list[v_list++].RGBA);
+    
+    set_vect_4( vertex_list[v_list].world, x - offset, y, z - 40, 1.0 ); //11
+    set_vect_4( vertex_list[v_list].STRQ, 0, 0, 0, 1 );
+    copy_vect_RGBA_float( color, vertex_list[v_list++].RGBA);
+    
+    numvertices = 12;
+    
+    add_triangle( 0, 1, 2 );
+    add_triangle( 3, 4, 5 );
+    
+    add_triangle( 8, 7, 6 );
+    add_triangle( 11, 10, 9 );
 }
 
 void caluculate_light_vectors() // will give us the normalized distance between the light point and the object point.
@@ -1759,7 +1827,7 @@ void display(void)
     {
         r_binary_text_file( &starter_texture, "rocks_color.ppm" );                // READ IN TEXTURE AND BUMP MAP
         copy_texture( &starter_texture );
-        perspective_correct = OFF;                                              // jamesk this is a hack so that the texturing always works for this model
+        //perspective_correct = OFF;                                              // jamesk this is a hack so that the texturing always works for this model
         mipmap();
         if( mipmapping )
         {
@@ -1777,7 +1845,8 @@ void display(void)
         read_cube_texture_test();                                                    // READ IN THE CUBE MAP
     }
 
-    init_quad( 0.0, 0.0, -10.0, 5);
+    init_mega_quad( 0.0, 0.0, -10.0, 5);
+    //init_quad( 0.0, 0.0, -10.0, 5);
     //init_plane();
     
 //    if( !camera )
@@ -1847,6 +1916,7 @@ void display(void)
         second_pass = ON;
     }
     
+    printf("Perpective correct: %d\n", perspective_correct);
     printf("fps = %.2f\n", 1 / elapsed_time( &sw_renderer_timer ));
     numvertices = 0;                                                    // READY FOR NEXT RENDER
     numtriangles = 0;
@@ -1912,7 +1982,7 @@ static void Key(unsigned char key, int x, int y)
         case 'g':        d_buff_active = (1 - d_buff_active);            break; // turns on the depth buffer
             
         case 'y':       perspective_draw = (1 - perspective_draw);       break;
-        case 'h':       perspective_correct = (1-perspective_correct);   break;
+        case 'h':       perspective_correct = ( 1 - perspective_correct );   break;
             
         case 'r':       rasterize = (1 - rasterize);                     break;
             
