@@ -9,7 +9,7 @@
  * To run:  ./swV2
  */
 #ifndef GL_SILENCE_DEPRECATION
-#define GL_SILENCE_DEPRECATION  
+#define GL_SILENCE_DEPRECATION
 #endif
 
 /*************************************************************************/
@@ -271,7 +271,7 @@ float zangle =  0.0;                         //^ angles 3D world model rotated b
 
 float near =    20.0;                         // definition of furthest 'z' axis boundaries of our 3D models
 
-float far =     -40.0;
+float far =     -1000.0;
 
 
 float wave =    0.0;
@@ -407,6 +407,8 @@ int mipmapping = OFF;
 
 int mipmap_level = 0;
 
+int naive_texture_filtering = OFF;
+
 /*************************************************************************/
 /* utility functions                                                     */
 /*************************************************************************/
@@ -457,7 +459,7 @@ void init_model();
 
 void draw_point(POINT *p, float blend_weight)
 {
-    
+    //printf("z = %f\n", p->position[Z]); // jamek print
     int x = (int) p->position[X] + 400;
     int y = (int) p->position[Y] + 400;
     float r, g, b, a;
@@ -584,15 +586,38 @@ void draw_point(POINT *p, float blend_weight)
             s_pcorrect *= z;
             t_pcorrect *= z;
         }
+        if( !naive_texture_filtering )
+        {
+            int local_s = (int)(text->width * s_pcorrect);
+            int local_t = (int)(text->height * t_pcorrect);
+            
+            r = text->data[local_t][local_s][R] / 255.0;
+            g = text->data[local_t][local_s][G] / 255.0;
+            b = text->data[local_t][local_s][B] / 255.0;
+            a = text->data[local_t][local_s][A] / 255.0; // local value of color data stored in the pixel space.
+            
+        }
+        else
+        {
+            unsigned char brew_color[4];
+            brew( s_pcorrect, t_pcorrect, p->world[Z],  brew_color);
+            
+            r = brew_color[R] / 255.0;
+            g = brew_color[G] / 255.0;
+            b = brew_color[B] / 255.0;
+            a = brew_color[A] / 255.0;
+            
+            if( p->position[Z] == 10 )
+            {
+                
+                r = 1.0;
+                g = 0.0;
+                b = 0.0;
+                a = 0.0;
+            }
+        }
         
-        int local_s = (int)(text->width * s_pcorrect);
-        int local_t = (int)(text->height * t_pcorrect);
-        
-        r = text->data[local_t][local_s][R] / 255.0;
-        g = text->data[local_t][local_s][G] / 255.0;
-        b = text->data[local_t][local_s][B] / 255.0;
-        a = text->data[local_t][local_s][A] / 255.0; // local value of color data stored in the pixel space.
-        
+
         
         //put the color in the texture for the point into the point
         if( modulate )
@@ -770,6 +795,8 @@ void draw_triangle_barycentric( POINT *v0, POINT *v1, POINT *v2 )
                 
                 
                 p.position[Z]    = w[0] * v0->position[Z] + w[1] * v1->position[Z] + w[2] * v2->position[Z];
+                
+                p.world[Z]    = w[0] * v0->world[Z] + w[1] * v1->world[Z] + w[2] * v2->world[Z];
                 
                 
                 p.RGBA[R]  = w[0] * v0->RGBA[R] + w[1] * v1->RGBA[R] + w[2] * v2->RGBA[R];
@@ -1846,7 +1873,7 @@ void display(void)
         read_cube_texture_test();                                                    // READ IN THE CUBE MAP
     }
 
-    init_mega_quad( 0.0, 0.0, -10.0, 5);
+    init_mega_quad( 0.0, 0.0, 0.0, 5);
     //init_quad( 0.0, 0.0, -10.0, 5);
     //init_plane();
     
@@ -1862,7 +1889,7 @@ void display(void)
     //init_cube( 0.0, 0.0, -10.0, 1);
     //r_obj_file_scenter("teapot.obj", 0.0, 0.0, -10.0);
     
-    rotate_translate_matrix( xangle, yangle, zangle, translation_value - 30 );
+    rotate_translate_matrix( xangle, yangle, zangle, translation_value - 10);
     
     //    MATRIX_4 camera_matrix;
     //    set_camera_matrix( camera_matrix, eye, lookat, global_camera.up );
@@ -1888,7 +1915,7 @@ void display(void)
         form_model(1.0);
     }
     
-    scale_p_model(100.0);                                               // scales model in position vectors after formation.
+    scale_p_model(75.0);                                               // scales model in position vectors after formation.
     
     draw_model();                                                       // LOADS COLOR BUFFER, USES DRAW TRIANGLE ETC
     
@@ -2012,6 +2039,7 @@ static void Key(unsigned char key, int x, int y)
         case'T':        mipmapping = 1 - mipmapping;                break;
         case'+':        if( mipmap_level < 10 ) {mipmap_level++;}     break;
         case'_':        if( mipmap_level > 0 ) {mipmap_level--;}       break;
+        case'*':        naive_texture_filtering = ( 1 - naive_texture_filtering); break;
     }
     draw_one_frame = 1;
     glutPostRedisplay();
