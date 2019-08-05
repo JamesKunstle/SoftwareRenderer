@@ -2,13 +2,14 @@
 
 /*
  *
- * point.c - simple GLUT app that draws one frame with a single point at origin
+ * software_rendererV2.c- simple GLUT app that draws 3D shapes
  *
  * To build:  gcc -framework OpenGL -framework GLUT software_rendererV2.c -o swV2
  *
+ * To run:  ./swV2
  */
 #ifndef GL_SILENCE_DEPRECATION
-#define GL_SILENCE_DEPRECATION
+#define GL_SILENCE_DEPRECATION  
 #endif
 
 /*************************************************************************/
