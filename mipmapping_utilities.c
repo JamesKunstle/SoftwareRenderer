@@ -313,42 +313,97 @@ void brew( float s_correct, float t_correct, float point_depth, unsigned char co
     MM_IMAGE *top_most;
     MM_IMAGE *bottom_most;
     
+//    if( point_depth >= -70 )
+//    {
+//        real_map_level = 0;
+//        psi = (point_depth) / 80;
+//    }
+//    else if( point_depth >= -80 )
+//    {
+//        real_map_level = 1;
+//        psi = (point_depth) / 90;
+//    }
+//    else if( point_depth >= -90 )
+//    {
+//        real_map_level = 2;
+//        psi = point_depth / 100;
+//    }
+//    else if( point_depth >= -100 )
+//    {
+//        real_map_level = 3;
+//        psi = point_depth / 110;
+//    }
+//    else if( point_depth >= -110 )
+//    {
+//        real_map_level = 4;
+//        psi = point_depth / 120;
+//    }
+//    else if( point_depth >= -120 )
+//    {
+//        real_map_level = 5;
+//        psi = point_depth / 130;
+//    }
+//    else if( point_depth >= -130 )
+//    {
+//        real_map_level = 6;
+//        psi = point_depth / 140;
+//    }
+//    else if( point_depth >= -140 )
+//    {
+//        real_map_level = 7;
+//        psi = point_depth / 150;
+//    }
+//    else if( point_depth >= -150 )
+//    {
+//        real_map_level = 8;
+//        psi = point_depth / 160;
+//    }
+//    else if( point_depth >= -160 )
+//    {
+//        real_map_level = 9;
+//        psi = point_depth / 170;
+//    }
+//    else if( point_depth >= -170 )
+//    {
+//        real_map_level = 10;
+//        psi = point_depth / 180;
+//    }
     if( point_depth >= -70 )
     {
         real_map_level = 0;
-        psi = (point_depth) / 80;
+        psi = (point_depth) / 75;
     }
-    else if( point_depth >= -80 )
+    else if( point_depth >= -75 )
     {
         real_map_level = 1;
-        psi = (point_depth) / 90;
+        psi = (point_depth) / 80;
     }
-    else if( point_depth >= -90 )
+    else if( point_depth >= -100 )
     {
         real_map_level = 2;
-        psi = point_depth / 100;
+        psi = point_depth / 85;
     }
     else if( point_depth >= -100 )
     {
         real_map_level = 3;
-        psi = point_depth / 110;
+        psi = point_depth / 90;
     }
     else if( point_depth >= -110 )
     {
         real_map_level = 4;
+        psi = point_depth / 110;
+    }
+    else if( point_depth >= -110 )
+    {
+        real_map_level = 5;
         psi = point_depth / 120;
     }
     else if( point_depth >= -120 )
     {
-        real_map_level = 5;
+        real_map_level = 6;
         psi = point_depth / 130;
     }
     else if( point_depth >= -130 )
-    {
-        real_map_level = 6;
-        psi = point_depth / 140;
-    }
-    else if( point_depth >= -140 )
     {
         real_map_level = 7;
         psi = point_depth / 150;
@@ -440,11 +495,12 @@ void brew( float s_correct, float t_correct, float point_depth, unsigned char co
     
     copy_vect_RGBA( top_most->data[top_most_t][top_most_s], top_colors);
     copy_vect_RGBA( bottom_most->data[bottom_most_t][bottom_most_s], bottom_colors);
+    psi = 1.0;
     
-    color[R] = (( psi * top_colors[R]) + ( (1 - psi) * bottom_colors[R]));
-    color[G] = (( psi * top_colors[G]) + ( (1 - psi) * bottom_colors[G]));
-    color[B] = (( psi * top_colors[B]) + ( (1 - psi) * bottom_colors[B]));
-    color[A] = (( psi * top_colors[A]) + ( (1 - psi) * bottom_colors[A])); // local value of color data stored in the pixel space.
+    color[R] = (( psi * top_colors[R]) + ( (1.0 - psi) * bottom_colors[R]));
+    color[G] = (( psi * top_colors[G]) + ( (1.0 - psi) * bottom_colors[G]));
+    color[B] = (( psi * top_colors[B]) + ( (1.0 - psi) * bottom_colors[B]));
+    color[A] = (( psi * top_colors[A]) + ( (1.0 - psi) * bottom_colors[A])); // local value of color data stored in the pixel space.
     
     
     
