@@ -1856,11 +1856,12 @@ void display(void)
         r_binary_text_file( &starter_texture, "rocks_color.ppm" );                // READ IN TEXTURE AND BUMP MAP
         copy_texture( &starter_texture );
         //perspective_correct = OFF;                                              // jamesk this is a hack so that the texturing always works for this model
-        mipmap();
-        if( mipmapping )
-        {
-            mm_to_ct( mipmap_level );                                                          // copies image data from mipmap
-        }
+//        mipmap();
+//        if( mipmapping )
+//        {
+//            mm_to_ct( mipmap_level );                                                          // copies image data from mipmap
+//        }
+        rainbow_mipmap();
     }
     
     if( bumpmapping)

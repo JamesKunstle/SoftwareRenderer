@@ -368,60 +368,60 @@ void brew( float s_correct, float t_correct, float point_depth, unsigned char co
 //        real_map_level = 10;
 //        psi = point_depth / 180;
 //    }
-    if( point_depth >= -70 )
+    if( point_depth >= -70 )                                    //red
     {
         real_map_level = 0;
-        psi = (point_depth) / 75;
+        psi = 1.0;
     }
-    else if( point_depth >= -75 )
+    else if( point_depth >= -75 )                               // orange
     {
         real_map_level = 1;
-        psi = (point_depth) / 80;
+        psi = (-75 - point_depth) / (-75 - -70);
     }
-    else if( point_depth >= -100 )
+    else if( point_depth >= -100 )                              //yellow
     {
         real_map_level = 2;
-        psi = point_depth / 85;
+        psi = (-100 - point_depth) / (-100 - -75);
     }
     else if( point_depth >= -100 )
     {
         real_map_level = 3;
         psi = point_depth / 90;
     }
-    else if( point_depth >= -110 )
+    else if( point_depth >= -110 )                              //green
     {
         real_map_level = 4;
-        psi = point_depth / 110;
+        psi = (-110 - point_depth) / (-110 - -100);
     }
     else if( point_depth >= -110 )
     {
         real_map_level = 5;
         psi = point_depth / 120;
     }
-    else if( point_depth >= -120 )
+    else if( point_depth >= -120 )                              //blue
     {
         real_map_level = 6;
-        psi = point_depth / 130;
+        psi = (-120 - point_depth) / (-120 - -110);
     }
-    else if( point_depth >= -130 )
+    else if( point_depth >= -130 )                              //indigo
     {
         real_map_level = 7;
-        psi = point_depth / 150;
+        psi = (-120 - point_depth) / (-130 - -120);
     }
-    else if( point_depth >= -150 )
+    else if( point_depth >= -150 )                              //violet
     {
         real_map_level = 8;
-        psi = point_depth / 160;
+        psi = (-130 - point_depth) / (-130 - -150);
     }
-    else if( point_depth >= -160 )
+    else if( point_depth >= -160 )                              //red
     {
         real_map_level = 9;
-        psi = point_depth / 170;
+        psi = (-150 - point_depth) / (-160 - -150);
     }
-    else if( point_depth >= -170 )
+    else if( point_depth >= -170 )                              //orange
     {
         real_map_level = 10;
-        psi = point_depth / 180;
+        psi = (-160 - point_depth) / (-170 - -160);
     }
     else // jamesk: need to take input from rest of the levels.
     {
@@ -431,7 +431,11 @@ void brew( float s_correct, float t_correct, float point_depth, unsigned char co
     
     //printf("real_map_level = %d, point_depth = %f\n", real_map_level, point_depth);
     
-    CLAMP(real_map_level, 0, 10);
+    real_map_level = CLAMP(real_map_level, 0, 10);
+    
+    psi = CLAMP(psi, 0, 1.0);
+    
+    printf("%f\n", psi);
 
     switch ( real_map_level )
     {
@@ -495,13 +499,81 @@ void brew( float s_correct, float t_correct, float point_depth, unsigned char co
     
     copy_vect_RGBA( top_most->data[top_most_t][top_most_s], top_colors);
     copy_vect_RGBA( bottom_most->data[bottom_most_t][bottom_most_s], bottom_colors);
-    psi = 1.0;
     
     color[R] = (( psi * top_colors[R]) + ( (1.0 - psi) * bottom_colors[R]));
     color[G] = (( psi * top_colors[G]) + ( (1.0 - psi) * bottom_colors[G]));
     color[B] = (( psi * top_colors[B]) + ( (1.0 - psi) * bottom_colors[B]));
     color[A] = (( psi * top_colors[A]) + ( (1.0 - psi) * bottom_colors[A])); // local value of color data stored in the pixel space.
+}
+
+void rainbow_mipmap() // fills the mipmap levels with rainbow colors in order to visualize color change
+{
+    unsigned char RED[4] = {255, 0, 0, 0};
+    unsigned char ORANGE[4] = {255, 127, 0, 0};
+    unsigned char YELLOW[4] = {255, 255, 0, 0};
+    unsigned char GREEN[4] = {0, 255, 0, 0};
+    unsigned char BLUE[4] = {0, 0, 255, 0};
+    unsigned char INDIGO[4] = {75, 0, 130, 0};
+    unsigned char VIOLET[4] = {148, 0, 211, 0};
     
-    
-    
+    for(int i = 0; i < 1024; i++)
+    {
+       for(int j = 0; j < 1024; j++)
+       {
+           copy_vect_RGBA(RED, mm.zero.data[i][j]);
+           copy_vect_RGBA(RED, mm.seven.data[i][j]);
+           
+       }
+    }
+    for(int i = 0; i < 1024; i++)
+    {
+        for(int j = 0; j < 1024; j++)
+        {
+            copy_vect_RGBA(ORANGE, mm.one.data[i][j]);
+            copy_vect_RGBA(ORANGE, mm.eight.data[i][j]);
+            
+        }
+    }
+    for(int i = 0; i < 1024; i++)
+    {
+        for(int j = 0; j < 1024; j++)
+        {
+            copy_vect_RGBA(YELLOW, mm.two.data[i][j]);
+            copy_vect_RGBA(YELLOW, mm.nine.data[i][j]);
+            
+        }
+    }
+    for(int i = 0; i < 1024; i++)
+    {
+        for(int j = 0; j < 1024; j++)
+        {
+            copy_vect_RGBA(GREEN, mm.three.data[i][j]);
+            copy_vect_RGBA(GREEN, mm.ten.data[i][j]);
+            
+        }
+    }
+    for(int i = 0; i < 1024; i++)
+    {
+        for(int j = 0; j < 1024; j++)
+        {
+            copy_vect_RGBA(BLUE, mm.four.data[i][j]);
+            
+        }
+    }
+    for(int i = 0; i < 1024; i++)
+    {
+        for(int j = 0; j < 1024; j++)
+        {
+            copy_vect_RGBA(INDIGO, mm.five.data[i][j]);
+            
+        }
+    }
+    for(int i = 0; i < 1024; i++)
+    {
+        for(int j = 0; j < 1024; j++)
+        {
+            copy_vect_RGBA(VIOLET, mm.six.data[i][j]);
+            
+        }
+    }
 }
