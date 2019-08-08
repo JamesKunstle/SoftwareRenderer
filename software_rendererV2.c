@@ -302,7 +302,7 @@ float eye[4]                = { 0, 0, 0, 1 };   // location of eye array
 
 float light[4]              = { 1, -1, -1, 1 };
 
-float light_ambient[4]      = { 0.5, 0.5, 0.5, 1.0 };
+float light_ambient[4]      = { 0.7, 0.7, 0.7, 1.0 };
 
 float light_diffuse[4]      = { 1, 1, 1, 1 };
 
@@ -1829,7 +1829,7 @@ void display(void)
     if( draw_one_frame == 0 )
         return;
     
-    clear_c_buff(0, 0, 0, 1);                                                // clear the color and depth buffers
+    clear_c_buff(1, 1, 1, 1);                                                // clear the color and depth buffers
     clear_d_buff(1000000);
     
     //print_stats();
@@ -1876,7 +1876,7 @@ void display(void)
         read_cube_texture_test();                                                    // READ IN THE CUBE MAP
     }
 
-    init_mega_quad( 0.0, 0.0, 0.0, 5);
+    //init_mega_quad( 0.0, 0.0, 0.0, 5);
     //init_quad( 0.0, 0.0, -10.0, 5);
     //init_plane();
     
@@ -1888,8 +1888,8 @@ void display(void)
 //    {
 //        init_sphere(1.0, 2.0, 0, 0, 0);
 //    }
-    
-    //init_cube( 0.0, 0.0, -10.0, 1);
+    init_sphere(1.0, 2.0, 0, 0, -20);
+    //init_cube( 0.0, 0.0, -40.0, 1);
     //r_obj_file_scenter("teapot.obj", 0.0, 0.0, -10.0);
     
     rotate_translate_matrix( xangle, yangle, zangle, translation_value - 10);
@@ -2009,6 +2009,7 @@ static void Key(unsigned char key, int x, int y)
         case 'x':       translation_value -= 0.5;                          break; // these move the object closer or further from the depth camera
             
         case 't':        texturing = (1 - texturing);                    break; // turns on texturing
+        case 'G':        bumpmapping = (1 - bumpmapping);                    break; // turns on bumpmapping
         case 'b':        c_buff_blending = (1 - c_buff_blending);        break; // turns on color buffer blending
         case 'g':        d_buff_active = (1 - d_buff_active);            break; // turns on the depth buffer
             
