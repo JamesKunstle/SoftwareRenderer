@@ -10,6 +10,7 @@ typedef struct model{
 #define SPHERE 100
 #define QUAD   101
 #define TEAPOT 102
+#define CUBE 103
 #define MAX_OBJECTS 50
 
 /*------------------------------*/
@@ -42,7 +43,44 @@ void read_scene_file(char* filename)
         {
             model->type = SPHERE;
         }
+        else if( strncmp(object_type, "TEAPOT", 6) == 0)
+        {
+            model->type = TEAPOT;
+        }
+        else if( strncmp(object_type, "CUBE", 6) == 0)
+        {
+            model->type = CUBE;
+        }
         num_objects++;
+    }
+    fclose(fp);
+}
+
+void write_scene_file( char *filename)
+{
+    FILE *fp;
+    
+    if( ( fp = fopen(filename, "w" ) ) == NULL )
+        return;
+    
+    for( int i = 0; i < num_objects; i++ )
+    {
+        MODEL *m = &object_list[i];
+        
+        fprintf( fp, "MODEL " );
+        
+        switch( m->type )
+        {
+            case QUAD:    fprintf( fp, "QUAD ");      break;
+            case CUBE:    fprintf( fp, "CUBE ");     break;
+            case SPHERE:  fprintf( fp, "SPHERE ");   break;
+            case TEAPOT:  fprintf( fp, "TEAPOT ");   break;
+        }
+        
+        fprintf(fp, "[%d] ", m->material_index);
+        fprintf(fp, "[%f %f %f]", m->center[X], m->center[Y], m->center[Z]);
+        fprintf(fp, "[%f %f %f]", m->scale[X], m->scale[Y], m->scale[Z]);
+        fprintf(fp, "[%f %f %f]", m->rotation[X], m->rotation[Y], m->rotation[Z]);
     }
     fclose(fp);
 }
