@@ -300,19 +300,19 @@ int multiple = OFF;                         // global condition of rendering mul
 
 float eye[4]                = { 0, 0, 0, 1 };   // location of eye array
 
-float light[4]              = { 1, -1, -1, 1 };
+float light[4]              = { 0, 1, 0, 1 };
 
-float light_ambient[4]      = { 0.7, 0.7, 0.7, 1.0 };
+float light_ambient[4]      = { 1.0, 1.0, 1.0, 1.0 };
 
 float light_diffuse[4]      = { 1, 1, 1, 1 };
 
 float light_specular[4]     = { 1, 1, 1, 1 };
 
-float material_ambient[4]   = {0.7,     0.7,     0.7,     1};
+float material_ambient[4]   = {0.24725,      0.1995,         0.0745, 1};
 
-float material_diffuse[4]   = {0.75,    0.75,    0.75,    1};
+float material_diffuse[4]   = {0.75164,       0.60648,        0.22648,1};
 
-float material_specular[4]  = {0.75,    0.75,    0.75,   1}; // CURRENTLY USING GENERAL MATERIAL PROPERTIES FOR LIGHTING
+float material_specular[4]  = {0.628281,      0.555802,       0.366065,       1}; // CURRENTLY USING GENERAL MATERIAL PROPERTIES FOR LIGHTING
 
 float shinyness = (0.4 * 128);
 
@@ -469,6 +469,7 @@ void draw_point(POINT *p, float blend_weight)
     float local_normal[4];
     float l_color[4];
     float tmp[4];
+    float z = 1.0/p->position[Z];
     
     local_normal[0] = p->normal[0];
     local_normal[1] = p->normal[1];
@@ -488,6 +489,13 @@ void draw_point(POINT *p, float blend_weight)
         p->rendered = 1;
         g_buffer[y][x] = *p;
         return;
+    }
+    
+    if(perspective_draw && perspective_correct)
+    {
+        mult_scalar_vector( p->RGBA, z, p->RGBA);
+        mult_scalar_vector( p->STRQ, z, p->STRQ);
+        mult_scalar_vector( p->normal, z, p->normal);
     }
     
     l_color[0] = p->RGBA[R]; // local color that we can use for Phong lighting
@@ -513,13 +521,23 @@ void draw_point(POINT *p, float blend_weight)
         
         //float normalizer[4] = { -0.5, -0.5, -0.5, 0.0};
         //add_vectors(bump, normalizer, bump);
-        normalize_vector(bump, bump);
-        mult_vect(bump, local_normal, local_normal);
+        mult_scalar_vector(bump, -2.0, bump);
+        bump[0] += 1;
+        bump[1] += 1;
+        bump[2] += 1;
+        bump[3] += 1;
+        
+        add_vectors(local_normal, bump, local_normal);
+        normalize_vector(local_normal, local_normal);
+        //mult_scalar_vector(local_normal, -1.0, local_normal);
+//        normalize_vector(bump, bump);
+//        mult_vect(bump, local_normal, local_normal);
     }
     
     if( phong_lighting )
     {
         float *current_light;
+        
         if(local_lighting)
         {
             current_light = p->light;
@@ -539,7 +557,7 @@ void draw_point(POINT *p, float blend_weight)
         float r[4]; // reflection vector that will be filled by the function call below.
         reflect_vect( local_normal, light, r );
         float specular = dot( eye, r );
-        specular = pow( specular, 1 );
+        specular = pow( specular, shinyness );
         
         float specular_array[4];
         mult_scalar_vector(material_specular, specular, specular_array);
@@ -548,8 +566,8 @@ void draw_point(POINT *p, float blend_weight)
         
         /*      ambient         */
         float temp_ambient[4];
-        mult_vect(material_ambient, ambient, temp_ambient);
-        mult_vect(temp_ambient, light_ambient, temp_ambient);
+        //mult_vect(material_ambient, ambient, temp_ambient);
+        mult_vect(material_ambient, light_ambient, temp_ambient);
         add_vectors(l_color, temp_ambient, l_color);
         
     }
@@ -570,8 +588,7 @@ void draw_point(POINT *p, float blend_weight)
             text = &cubemap[index];
             
         }
-        
-        float z = 1.0/p->position[Z];
+//        float z = 1.0/p->position[Z];
         float s_pcorrect = p->STRQ[S];
         float t_pcorrect = p->STRQ[T];
         float position_vector[4];
@@ -583,11 +600,11 @@ void draw_point(POINT *p, float blend_weight)
             t_pcorrect = position_vector[T];
         }
         
-        if(perspective_correct)
-        {
-            s_pcorrect *= z;
-            t_pcorrect *= z;
-        }
+//        if(perspective_correct)
+//        {
+//            s_pcorrect *= z;
+//            t_pcorrect *= z;
+//        }
         if( !naive_texture_filtering )
         {
             int local_s = (int)(text->width * s_pcorrect);
@@ -952,7 +969,7 @@ void cal_face_normal(void)
         subtract_vectors(v2->world, v0->world, sub_vect_2); // vertex2 - vertex0
         
         // sub_vect 1 and 2 will have the vectors that we're interested in taking the cross product of.
-        cross_vect(sub_vect_1, sub_vect_2, i_normal);
+        cross_vect(sub_vect_2, sub_vect_1, i_normal);
         normalize_vector(i_normal, i_normal);
         //i_normal will have the value that we're interested in for each triangle's normal.
         
@@ -1630,35 +1647,37 @@ void draw_g_buffer()
 void print_stats()
 {
     printf("==============================================\n");
-    printf("Depth-buffering:                 (m)       %d\n", d_buff_active);
+    printf("Depth-buffering:                 (g)       %d\n", d_buff_active);
     printf("_______________                  ___       ___\n");
-    printf("Color-buffer blending:           (n)       %d\n", c_buff_blending);
+    printf("Color-buffer blending:           (b)       %d\n", c_buff_blending);
     printf("_______________                  ___       ___\n");
-    printf("Texturing enabled:               (b)       %d\n", texturing);
+    printf("Texturing enabled:               (t)       %d\n", texturing);
     printf("_______________                  ___       ___\n");
     printf("Rasterization enabled:           (r)       %d\n", rasterize);
     printf("_______________                  ___       ___\n");
-    printf("Perspective enabled:             (p)       %d\n", perspective_draw);
+    printf("Perspective enabled:             (y)       %d\n", perspective_draw);
     printf("_______________                  ___       ___\n");
-    printf("Perspective-correct enabled:     (l)       %d\n", perspective_correct);
+    printf("Perspective-correct enabled:     (h)       %d\n", perspective_correct);
     printf("_______________                  ___       ___\n");
-    printf("Per-vertex lighting:             (P)       %d\n", phong_lighting);
+    printf("Per-vertex lighting:             (f)       %d\n", phong_lighting);
     printf("_______________                  ___       ___\n");
-    printf("Face lighting:                   (F)       %d\n", face_lighting);
+    printf("Face lighting:                   (v)       %d\n", face_lighting);
     printf("_______________                  ___       ___\n");
-    printf("Bump-mapping / mod enabled:      (6)       %d\n", modulate);
+    printf("Bump-mapping / mod enabled:      (G)       %d\n", modulate);
     printf("_______________                  ___       ___\n");
-    printf("Cube-mapping enabled:            (#)       %d\n", cube_mapping);
+    printf("Cube-mapping enabled:            (C)       %d\n", cube_mapping);
     printf("_______________                  ___       ___\n");
-    printf("Deferred rendering enabled:      (Q)       %d\n", deferred_rendering);
+    printf("Deferred rendering enabled:      (u)       %d\n", deferred_rendering);
     printf("_______________                  ___       ___\n");
-    printf("Use-hardware enabled:            (H)       %d\n", use_hardware_opengl);
+    printf("Use-hardware enabled:            (j)       %d\n", use_hardware_opengl);
     printf("_______________                  ___       ___\n");
-    printf("Software-vertex-processing:      (G)       %d\n", sw_vertex_processing);
+    printf("Software-vertex-processing:      (m)       %d\n", sw_vertex_processing);
     printf("_______________                  ___       ___\n");
-    printf("Cube-mapping                     (C)       %d\n", cube_mapping);
+    printf("Tex-gen                          (H)       %d\n", tex_gen);
     printf("_______________                  ___       ___\n");
-    printf("Tex-gen                          (E)       %d\n", tex_gen);
+    printf("Reflection                       (R)       %d\n", reflection);
+    printf("_______________                  ___       ___\n");
+    printf("Modulate                         (n)       %d\n", modulate);
     printf("==============================================^^^^^^^^^^^^^^\n");
 }
 
@@ -1832,7 +1851,7 @@ void display(void)
     clear_c_buff(1, 1, 1, 1);                                                // clear the color and depth buffers
     clear_d_buff(1000000);
     
-    //print_stats();
+    print_stats();
     
     if( deferred_rendering )
     {
