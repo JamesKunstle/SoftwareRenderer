@@ -24,6 +24,7 @@
 #include <stdio.h>
 #include <sys/time.h>
 #include <strings.h>
+
 /*************************************************************************/
 /* defines                                                               */
 /*************************************************************************/
@@ -453,6 +454,7 @@ void init_model();
 #include "matrix_utilities.c"
 #include "initialize_gl.c"
 #include "mipmapping_utilities.c"
+#include "scene_file_utility.c"
 
 void draw_point(POINT *p, float blend_weight)
 {
