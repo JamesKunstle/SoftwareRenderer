@@ -85,3 +85,21 @@ void write_scene_file( char *filename)
     fclose(fp);
 }
 
+void gen_z_axis_spheres_scene_file()
+{
+    num_objects = 0;
+    
+    for( int i = 0; i < 20; i++ )
+    {
+        MODEL *m = &object_list[i];
+        
+        m->type = SPHERE;
+        m->material_index = i;
+        set_vect(m->center, 0, 0, i / 19.0, 1);
+        set_vect(m->scale, 1, 1, 1, 1);
+        set_vect(m->rotation, 0, 0, 0, 1);
+        
+        num_objects++;
+    }
+}
+
