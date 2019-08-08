@@ -2,10 +2,11 @@
 
 /*
  *
- * point.c - simple GLUT app that draws one frame with a single point at origin
+ * software_rendererV2.c- simple GLUT app that draws 3D shapes
  *
  * To build:  gcc -framework OpenGL -framework GLUT software_rendererV2.c -o swV2
  *
+ * To run:  ./swV2
  */
 #ifndef GL_SILENCE_DEPRECATION
 #define GL_SILENCE_DEPRECATION
@@ -269,9 +270,9 @@ float yangle =  0.0;
 float zangle =  0.0;                         //^ angles 3D world model rotated by
 
 
-float near =    10.0;                         // definition of furthest 'z' axis boundaries of our 3D models
+float near =    20.0;                         // definition of furthest 'z' axis boundaries of our 3D models
 
-float far =     -40.0;
+float far =     -1000.0;
 
 
 float wave =    0.0;
@@ -407,6 +408,8 @@ int mipmapping = OFF;
 
 int mipmap_level = 0;
 
+int naive_texture_filtering = OFF;
+
 /*************************************************************************/
 /* utility functions                                                     */
 /*************************************************************************/
@@ -458,7 +461,7 @@ void init_model();
 
 void draw_point(POINT *p, float blend_weight)
 {
-    
+    //printf("z = %f\n", p->position[Z]); // jamek print
     int x = (int) p->position[X] + 400;
     int y = (int) p->position[Y] + 400;
     float r, g, b, a;
@@ -585,15 +588,38 @@ void draw_point(POINT *p, float blend_weight)
             s_pcorrect *= z;
             t_pcorrect *= z;
         }
+        if( !naive_texture_filtering )
+        {
+            int local_s = (int)(text->width * s_pcorrect);
+            int local_t = (int)(text->height * t_pcorrect);
+            
+            r = text->data[local_t][local_s][R] / 255.0;
+            g = text->data[local_t][local_s][G] / 255.0;
+            b = text->data[local_t][local_s][B] / 255.0;
+            a = text->data[local_t][local_s][A] / 255.0; // local value of color data stored in the pixel space.
+            
+        }
+        else
+        {
+            unsigned char brew_color[4];
+            brew( s_pcorrect, t_pcorrect, p->world[Z],  brew_color);
+            
+            r = brew_color[R] / 255.0;
+            g = brew_color[G] / 255.0;
+            b = brew_color[B] / 255.0;
+            a = brew_color[A] / 255.0;
+            
+            if( p->position[Z] == 10 )
+            {
+                
+                r = 1.0;
+                g = 0.0;
+                b = 0.0;
+                a = 0.0;
+            }
+        }
         
-        int local_s = (int)(text->width * s_pcorrect);
-        int local_t = (int)(text->height * t_pcorrect);
-        
-        r = text->data[local_t][local_s][R] / 255.0;
-        g = text->data[local_t][local_s][G] / 255.0;
-        b = text->data[local_t][local_s][B] / 255.0;
-        a = text->data[local_t][local_s][A] / 255.0; // local value of color data stored in the pixel space.
-        
+
         
         //put the color in the texture for the point into the point
         if( modulate )
@@ -771,6 +797,8 @@ void draw_triangle_barycentric( POINT *v0, POINT *v1, POINT *v2 )
                 
                 
                 p.position[Z]    = w[0] * v0->position[Z] + w[1] * v1->position[Z] + w[2] * v2->position[Z];
+                
+                p.world[Z]    = w[0] * v0->world[Z] + w[1] * v1->world[Z] + w[2] * v2->world[Z];
                 
                 
                 p.RGBA[R]  = w[0] * v0->RGBA[R] + w[1] * v1->RGBA[R] + w[2] * v2->RGBA[R];
@@ -1320,11 +1348,11 @@ void init_quad( float x, float y, float z, float s )
     
     float offset = sqrt( pow( s, 2) / 2.0 );    // half of the side length of a quad.
     
-    set_vect_4( vertex_list[v_list].world, x - offset, y + offset, z, 1.0 ); //0
+    set_vect_4( vertex_list[v_list].world, x - offset, y + offset, z - 80, 1.0 ); //0
     set_vect_4( vertex_list[v_list].STRQ, 0, 0, 0, 1 );
     copy_vect_RGBA_float( color, vertex_list[v_list++].RGBA);
     
-    set_vect_4( vertex_list[v_list].world, x + offset, y + offset, z, 1.0 ); //1
+    set_vect_4( vertex_list[v_list].world, x + offset, y + offset, z - 80, 1.0 ); //1
     set_vect_4( vertex_list[v_list].STRQ, 0, 1, 0, 1 );
     copy_vect_RGBA_float( color, vertex_list[v_list++].RGBA);
     
@@ -1340,7 +1368,7 @@ void init_quad( float x, float y, float z, float s )
     set_vect_4( vertex_list[v_list].STRQ, 1, 0, 0, 1 );
     copy_vect_RGBA_float( color, vertex_list[v_list++].RGBA);
     
-    set_vect_4( vertex_list[v_list].world, x - offset, y + offset, z, 1.0 ); //4
+    set_vect_4( vertex_list[v_list].world, x - offset, y + offset, z - 80, 1.0 ); //5
     set_vect_4( vertex_list[v_list].STRQ, 0, 0, 0, 1 );
     copy_vect_RGBA_float( color, vertex_list[v_list++].RGBA);
     
@@ -1349,6 +1377,74 @@ void init_quad( float x, float y, float z, float s )
     add_triangle( 0, 1, 2 );
     add_triangle( 3, 4, 5 );
     
+}
+
+void init_mega_quad( float x, float y, float z, float s )
+{
+    init_model();
+    int v_list = 0;
+    float color[4];
+    set_vect_4( color,  1,  0,  0,  0 );
+    
+    float offset = sqrt( pow( s, 2) / 2.0 );    // half of the side length of a quad.
+    
+    set_vect_4( vertex_list[v_list].world, x - offset, y, z - 40, 1.0 ); //0
+    set_vect_4( vertex_list[v_list].STRQ, 0, 0, 0, 1 );
+    copy_vect_RGBA_float( color, vertex_list[v_list++].RGBA);
+    
+    set_vect_4( vertex_list[v_list].world, x + offset, y, z - 40, 1.0 ); //1
+    set_vect_4( vertex_list[v_list].STRQ, 0, 1, 0, 1 );
+    copy_vect_RGBA_float( color, vertex_list[v_list++].RGBA);
+    
+    set_vect_4( vertex_list[v_list].world, x + offset, y - offset, z, 1.0 ); //2
+    set_vect_4( vertex_list[v_list].STRQ, 1, 1, 0, 1 );
+    copy_vect_RGBA_float( color, vertex_list[v_list++].RGBA);
+    
+    set_vect_4( vertex_list[v_list].world, x + offset, y - offset, z, 1.0 ); //3
+    set_vect_4( vertex_list[v_list].STRQ, 1, 1, 0, 1 );
+    copy_vect_RGBA_float( color, vertex_list[v_list++].RGBA);
+    
+    set_vect_4( vertex_list[v_list].world, x - offset, y - offset, z, 1.0 ); //4
+    set_vect_4( vertex_list[v_list].STRQ, 1, 0, 0, 1 );
+    copy_vect_RGBA_float( color, vertex_list[v_list++].RGBA);
+    
+    set_vect_4( vertex_list[v_list].world, x - offset, y, z - 40, 1.0 ); //5
+    set_vect_4( vertex_list[v_list].STRQ, 0, 0, 0, 1 );
+    copy_vect_RGBA_float( color, vertex_list[v_list++].RGBA);
+    
+    // end first quad
+    
+    set_vect_4( vertex_list[v_list].world, x - offset, y, z - 40, 1.0 ); //6
+    set_vect_4( vertex_list[v_list].STRQ, 0, 0, 0, 1 );
+    copy_vect_RGBA_float( color, vertex_list[v_list++].RGBA);
+    
+    set_vect_4( vertex_list[v_list].world, x + offset, y, z - 40, 1.0 ); //7
+    set_vect_4( vertex_list[v_list].STRQ, 0, 1, 0, 1 );
+    copy_vect_RGBA_float( color, vertex_list[v_list++].RGBA);
+    
+    set_vect_4( vertex_list[v_list].world, x + offset, y + offset, z - 80, 1.0 ); //8
+    set_vect_4( vertex_list[v_list].STRQ, 1, 1, 0, 1 );
+    copy_vect_RGBA_float( color, vertex_list[v_list++].RGBA);
+    
+    set_vect_4( vertex_list[v_list].world, x + offset, y + offset, z - 80, 1.0 ); //9
+    set_vect_4( vertex_list[v_list].STRQ, 1, 1, 0, 1 );
+    copy_vect_RGBA_float( color, vertex_list[v_list++].RGBA);
+    
+    set_vect_4( vertex_list[v_list].world, x - offset, y + offset, z - 80, 1.0 ); //10
+    set_vect_4( vertex_list[v_list].STRQ, 1, 0, 0, 1 );
+    copy_vect_RGBA_float( color, vertex_list[v_list++].RGBA);
+    
+    set_vect_4( vertex_list[v_list].world, x - offset, y, z - 40, 1.0 ); //11
+    set_vect_4( vertex_list[v_list].STRQ, 0, 0, 0, 1 );
+    copy_vect_RGBA_float( color, vertex_list[v_list++].RGBA);
+    
+    numvertices = 12;
+    
+    add_triangle( 0, 1, 2 );
+    add_triangle( 3, 4, 5 );
+    
+    add_triangle( 8, 7, 6 );
+    add_triangle( 11, 10, 9 );
 }
 
 void caluculate_light_vectors() // will give us the normalized distance between the light point and the object point.
@@ -1761,18 +1857,13 @@ void display(void)
     {
         r_binary_text_file( &starter_texture, "rocks_color.ppm" );                // READ IN TEXTURE AND BUMP MAP
         copy_texture( &starter_texture );
-        perspective_correct = OFF;                                              // jamesk this is a hack so that the texturing always works for this model
-        mipmap();
-        if( mipmapping )
-        {
-            mm_to_ct( 5 );                                                          // copies image data from mipmap level LOD to current_texture.
-            printf("current dimensions of C_T = %d, %d\n", current_texture.height, current_texture.width);
-        }
-        else
-        {
-                printf("current dimensions of C_T = %d, %d\n", current_texture.height, current_texture.width);
-        }
-        
+        //perspective_correct = OFF;                                              // jamesk this is a hack so that the texturing always works for this model
+//        mipmap();
+//        if( mipmapping )
+//        {
+//            mm_to_ct( mipmap_level );                                                          // copies image data from mipmap
+//        }
+        rainbow_mipmap();
     }
     
     if( bumpmapping)
@@ -1785,7 +1876,8 @@ void display(void)
         read_cube_texture_test();                                                    // READ IN THE CUBE MAP
     }
 
-    init_quad( 0.0, 0.0, -10.0, 5);
+    init_mega_quad( 0.0, 0.0, 0.0, 5);
+    //init_quad( 0.0, 0.0, -10.0, 5);
     //init_plane();
     
 //    if( !camera )
@@ -1800,7 +1892,7 @@ void display(void)
     //init_cube( 0.0, 0.0, -10.0, 1);
     //r_obj_file_scenter("teapot.obj", 0.0, 0.0, -10.0);
     
-    rotate_translate_matrix( xangle, yangle, zangle, translation_value - 30 );
+    rotate_translate_matrix( xangle, yangle, zangle, translation_value - 10);
     
     //    MATRIX_4 camera_matrix;
     //    set_camera_matrix( camera_matrix, eye, lookat, global_camera.up );
@@ -1826,7 +1918,7 @@ void display(void)
         form_model(1.0);
     }
     
-    scale_p_model(100.0);                                               // scales model in position vectors after formation.
+    scale_p_model(75.0);                                               // scales model in position vectors after formation.
     
     draw_model();                                                       // LOADS COLOR BUFFER, USES DRAW TRIANGLE ETC
     
@@ -1855,6 +1947,7 @@ void display(void)
         second_pass = ON;
     }
     
+    printf("Perpective correct: %d\n", perspective_correct);
     printf("fps = %.2f\n", 1 / elapsed_time( &sw_renderer_timer ));
     numvertices = 0;                                                    // READY FOR NEXT RENDER
     numtriangles = 0;
@@ -1920,7 +2013,7 @@ static void Key(unsigned char key, int x, int y)
         case 'g':        d_buff_active = (1 - d_buff_active);            break; // turns on the depth buffer
             
         case 'y':       perspective_draw = (1 - perspective_draw);       break;
-        case 'h':       perspective_correct = (1-perspective_correct);   break;
+        case 'h':       perspective_correct = ( 1 - perspective_correct );   break;
             
         case 'r':       rasterize = (1 - rasterize);                     break;
             
@@ -1947,8 +2040,9 @@ static void Key(unsigned char key, int x, int y)
         case'.':        second_pass = ON;      first_pass = OFF;    break;
         case'c':        camera = 1 - camera;                        break;
         case'T':        mipmapping = 1 - mipmapping;                break;
-        case'+':        mipmap_level++;                                    break;
-        case'-':        mipmap_level--;                                    break;
+        case'+':        if( mipmap_level < 10 ) {mipmap_level++;}     break;
+        case'_':        if( mipmap_level > 0 ) {mipmap_level--;}       break;
+        case'*':        naive_texture_filtering = ( 1 - naive_texture_filtering); break;
     }
     draw_one_frame = 1;
     glutPostRedisplay();

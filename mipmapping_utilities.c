@@ -34,7 +34,7 @@ MIPMAP mm;
 
 /* ============================   PROTOTYPES     ============================ */
 void average_RGBA_channels( unsigned char zero[4], unsigned char one[4], unsigned char two[4], unsigned char three[4], unsigned char output[4] );
-void mipmap();
+int mipmap();
 void triage();
 void mip_map_fill( int LOD, int cascade );
 /* ========================================================================== */
@@ -47,7 +47,7 @@ void average_RGBA_channels( unsigned char zero[4], unsigned char one[4], unsigne
     output[A] = ( zero[A] + one[A] + two[A] + three[A] ) / 4;
 }
 
-void mipmap()
+int mipmap()
 {
     int height    = current_texture.height;
     int width     = current_texture.width;
@@ -81,6 +81,8 @@ void mipmap()
     }
     
     triage();
+    
+    return mm.big_map;  // returns the max_lod of the texture.
 }
 
 void triage()
@@ -203,7 +205,6 @@ void mip_map_fill( int LOD, int cascade )
         read_height = send_mm->height;
         read_width =  send_mm->width;
         
-        printf("Height and width = %d, %d\n", read_height, read_width);
         
         int m = 0;
         int n = 0;
@@ -217,7 +218,6 @@ void mip_map_fill( int LOD, int cascade )
             n = 0;
             m++;
         }
-        printf("Wrote to %d pixels\n", m * n);
     }
     else
     {
@@ -237,7 +237,6 @@ void mip_map_fill( int LOD, int cascade )
             n = 0;
             m++;
         }
-        printf("Wrote to %d pixels\n", m * n);
     }
     dest->height = read_height / 2;
     dest->width = read_width / 2;
@@ -303,4 +302,278 @@ void mm_to_ct( int LOD ) // copies a mipmap image data into the current_texture 
     current_texture.width = width;
     
     
+}
+/* max_lod == max texture density, psi == proportion of max_lod in final output, color == implicit output of color value from texture.
+    colors selected in ratio (psi) from n and n + 1 mipmap texture.*/
+void brew( float s_correct, float t_correct, float point_depth, unsigned char color[4] )
+{
+    int max_lod = mm.big_map;   // maximum detail offset
+    int real_map_level;         // where the object is for detail
+    float psi;                  // proportion of top vs bottom texture.
+    MM_IMAGE *top_most;
+    MM_IMAGE *bottom_most;
+    
+//    if( point_depth >= -70 )
+//    {
+//        real_map_level = 0;
+//        psi = (point_depth) / 80;
+//    }
+//    else if( point_depth >= -80 )
+//    {
+//        real_map_level = 1;
+//        psi = (point_depth) / 90;
+//    }
+//    else if( point_depth >= -90 )
+//    {
+//        real_map_level = 2;
+//        psi = point_depth / 100;
+//    }
+//    else if( point_depth >= -100 )
+//    {
+//        real_map_level = 3;
+//        psi = point_depth / 110;
+//    }
+//    else if( point_depth >= -110 )
+//    {
+//        real_map_level = 4;
+//        psi = point_depth / 120;
+//    }
+//    else if( point_depth >= -120 )
+//    {
+//        real_map_level = 5;
+//        psi = point_depth / 130;
+//    }
+//    else if( point_depth >= -130 )
+//    {
+//        real_map_level = 6;
+//        psi = point_depth / 140;
+//    }
+//    else if( point_depth >= -140 )
+//    {
+//        real_map_level = 7;
+//        psi = point_depth / 150;
+//    }
+//    else if( point_depth >= -150 )
+//    {
+//        real_map_level = 8;
+//        psi = point_depth / 160;
+//    }
+//    else if( point_depth >= -160 )
+//    {
+//        real_map_level = 9;
+//        psi = point_depth / 170;
+//    }
+//    else if( point_depth >= -170 )
+//    {
+//        real_map_level = 10;
+//        psi = point_depth / 180;
+//    }
+    if( point_depth >= -70 )                                    //red
+    {
+        real_map_level = 0;
+        psi = 1.0;
+    }
+    else if( point_depth >= -75 )                               // orange
+    {
+        real_map_level = 1;
+        psi = (-75 - point_depth) / (-75 - -70);
+    }
+    else if( point_depth >= -100 )                              //yellow
+    {
+        real_map_level = 2;
+        psi = (-100 - point_depth) / (-100 - -75);
+    }
+    else if( point_depth >= -100 )
+    {
+        real_map_level = 3;
+        psi = point_depth / 90;
+    }
+    else if( point_depth >= -110 )                              //green
+    {
+        real_map_level = 4;
+        psi = (-110 - point_depth) / (-110 - -100);
+    }
+    else if( point_depth >= -110 )
+    {
+        real_map_level = 5;
+        psi = point_depth / 120;
+    }
+    else if( point_depth >= -120 )                              //blue
+    {
+        real_map_level = 6;
+        psi = (-120 - point_depth) / (-120 - -110);
+    }
+    else if( point_depth >= -130 )                              //indigo
+    {
+        real_map_level = 7;
+        psi = (-120 - point_depth) / (-130 - -120);
+    }
+    else if( point_depth >= -150 )                              //violet
+    {
+        real_map_level = 8;
+        psi = (-130 - point_depth) / (-130 - -150);
+    }
+    else if( point_depth >= -160 )                              //red
+    {
+        real_map_level = 9;
+        psi = (-150 - point_depth) / (-160 - -150);
+    }
+    else if( point_depth >= -170 )                              //orange
+    {
+        real_map_level = 10;
+        psi = (-160 - point_depth) / (-170 - -160);
+    }
+    else // jamesk: need to take input from rest of the levels.
+    {
+        printf("too far back");
+    }
+    real_map_level += max_lod;  // specifies that the texture that we read from is the topmost available.
+    
+    //printf("real_map_level = %d, point_depth = %f\n", real_map_level, point_depth);
+    
+    real_map_level = CLAMP(real_map_level, 0, 10);
+    
+    psi = CLAMP(psi, 0, 1.0);
+    
+    printf("%f\n", psi);
+
+    switch ( real_map_level )
+    {
+        case 0:
+            top_most = &mm.zero;
+            bottom_most = &mm.one;
+            break;
+        case 1:
+            top_most = &mm.one;
+            bottom_most = &mm.two;
+            break;
+        case 2:
+            top_most = &mm.two;
+            bottom_most = &mm.three;
+            break;
+        case 3:
+            top_most = &mm.three;
+            bottom_most = &mm.four;
+            break;
+        case 4:
+            top_most = &mm.four;
+            bottom_most = &mm.five;
+            break;
+        case 5:
+            top_most = &mm.five;
+            bottom_most = &mm.six;
+            break;
+        case 6:
+            top_most = &mm.six;
+            bottom_most = &mm.seven;
+            break;
+        case 7:
+            top_most = &mm.seven;
+            bottom_most = &mm.eight;
+            break;
+        case 8:
+            top_most = &mm.eight;
+            bottom_most = &mm.nine;
+            break;
+        case 9:
+            top_most = &mm.nine;
+            bottom_most = &mm.ten;
+            break;
+        case 10:
+            top_most = &mm.ten;
+            bottom_most = &mm.ten;
+            break;
+        default:
+            printf("Oops!\n");
+            break;
+    }
+    
+    int top_most_s = (int)(top_most->width * s_correct);
+    int top_most_t = (int)(top_most->height * t_correct);
+    
+    int bottom_most_s = (int)(bottom_most->width * s_correct);
+    int bottom_most_t = (int)(bottom_most->height * t_correct); // texture coordinates for both the top and the bottom texture.
+    
+    unsigned char top_colors[4];
+    unsigned char bottom_colors[4];
+    
+    copy_vect_RGBA( top_most->data[top_most_t][top_most_s], top_colors);
+    copy_vect_RGBA( bottom_most->data[bottom_most_t][bottom_most_s], bottom_colors);
+    
+    color[R] = (( psi * top_colors[R]) + ( (1.0 - psi) * bottom_colors[R]));
+    color[G] = (( psi * top_colors[G]) + ( (1.0 - psi) * bottom_colors[G]));
+    color[B] = (( psi * top_colors[B]) + ( (1.0 - psi) * bottom_colors[B]));
+    color[A] = (( psi * top_colors[A]) + ( (1.0 - psi) * bottom_colors[A])); // local value of color data stored in the pixel space.
+}
+
+void rainbow_mipmap() // fills the mipmap levels with rainbow colors in order to visualize color change
+{
+    unsigned char RED[4] = {255, 0, 0, 0};
+    unsigned char ORANGE[4] = {255, 127, 0, 0};
+    unsigned char YELLOW[4] = {255, 255, 0, 0};
+    unsigned char GREEN[4] = {0, 255, 0, 0};
+    unsigned char BLUE[4] = {0, 0, 255, 0};
+    unsigned char INDIGO[4] = {75, 0, 130, 0};
+    unsigned char VIOLET[4] = {148, 0, 211, 0};
+    
+    for(int i = 0; i < 1024; i++)
+    {
+       for(int j = 0; j < 1024; j++)
+       {
+           copy_vect_RGBA(RED, mm.zero.data[i][j]);
+           copy_vect_RGBA(RED, mm.seven.data[i][j]);
+           
+       }
+    }
+    for(int i = 0; i < 1024; i++)
+    {
+        for(int j = 0; j < 1024; j++)
+        {
+            copy_vect_RGBA(ORANGE, mm.one.data[i][j]);
+            copy_vect_RGBA(ORANGE, mm.eight.data[i][j]);
+            
+        }
+    }
+    for(int i = 0; i < 1024; i++)
+    {
+        for(int j = 0; j < 1024; j++)
+        {
+            copy_vect_RGBA(YELLOW, mm.two.data[i][j]);
+            copy_vect_RGBA(YELLOW, mm.nine.data[i][j]);
+            
+        }
+    }
+    for(int i = 0; i < 1024; i++)
+    {
+        for(int j = 0; j < 1024; j++)
+        {
+            copy_vect_RGBA(GREEN, mm.three.data[i][j]);
+            copy_vect_RGBA(GREEN, mm.ten.data[i][j]);
+            
+        }
+    }
+    for(int i = 0; i < 1024; i++)
+    {
+        for(int j = 0; j < 1024; j++)
+        {
+            copy_vect_RGBA(BLUE, mm.four.data[i][j]);
+            
+        }
+    }
+    for(int i = 0; i < 1024; i++)
+    {
+        for(int j = 0; j < 1024; j++)
+        {
+            copy_vect_RGBA(INDIGO, mm.five.data[i][j]);
+            
+        }
+    }
+    for(int i = 0; i < 1024; i++)
+    {
+        for(int j = 0; j < 1024; j++)
+        {
+            copy_vect_RGBA(VIOLET, mm.six.data[i][j]);
+            
+        }
+    }
 }
