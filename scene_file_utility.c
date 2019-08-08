@@ -95,9 +95,9 @@ void gen_z_axis_spheres_scene_file()
         
         m->type = SPHERE;
         m->material_index = i;
-        set_vect(m->center, 0, 0, i / 19.0, 1);
-        set_vect(m->scale, 1, 1, 1, 1);
-        set_vect(m->rotation, 0, 0, 0, 1);
+        set_vect_4(m->center, 0, 0, i / 19.0, 1);
+        set_vect_4(m->scale, 1, 1, 1, 1);
+        set_vect_4(m->rotation, 0, 0, 0, 1);
         
         num_objects++;
     }
